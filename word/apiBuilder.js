@@ -56,6 +56,244 @@
 		this.Document = Document;
 	}
 
+	function ApiRange(oElement, Start, End)
+	{
+		if (oElement == null)
+			return false;
+		if (Start === undefined)
+			Start = 0;
+		if (End === undefined)
+		{
+			End = 0;
+			for (var Index1 = 0; Index1 < oElement.Content.length; Index1++)
+			{
+				for (var Index2 = 0; Index2 < oElement.Content[Index1].Content.length; Index2++)
+				{
+					if (oElement.Content[Index1].Content[Index2] instanceof ParaText)
+					{
+						End++;
+					}
+				}
+			}
+		}
+			
+		this.hyperlink			  = null;
+		this.inlinePictures 	  = null;
+		this.isEmpty 			  = true;
+		this.lists 				  = null;
+		this.paragraphs 		  = null;
+		this.parentBody 		  = null;
+		this.parentContentControl = null;
+		this.parentTable 		  = null;
+		this.parentTableCell 	  = null;
+		this.style				  = null;
+		this.tables 			  = null;
+		this.text 				  = null;
+		this.RelativeStart 		  = Start;
+		this.RelativeEnd 		  = End;
+		this.AbsoluteStart 		  = undefined;
+		this.AbsoluteEnd		  = undefined;
+		this.StartPos 		 	  = null;
+		this.EndPos 			  = null;
+
+		this.SetStart = function()
+		{
+			if (oElement instanceof ApiDocument)
+			{
+				var AllViewedChars = 0;
+				var AllParagraphsList = oElement.Document.GetAllParagraphs({All : true});
+				point : for (var Index1 = 0; Index1 < AllParagraphsList.length; Index1++)
+				{
+					for (var Index2 = 0; Index2 < AllParagraphsList[Index1].Content.length; Index2++)
+					{
+						for (var Index3 = 0; Index3 < AllParagraphsList[Index1].Content[Index2].Content.length; Index3++)
+						{
+							if (AllParagraphsList[Index1].Content[Index2].Content[Index3] instanceof ParaText)
+							{
+								if (this.RelativeStart === AllViewedChars)
+								{
+									var StartRunPos = 
+									{
+										Class : AllParagraphsList[Index1].Content[Index2],
+										Position : Index3,
+									};
+									this.StartPos = AllParagraphsList[Index1].Content[Index2].GetDocumentPositionFromObject();
+									this.StartPos.push(StartRunPos);
+									break point;
+								}
+
+								AllViewedChars += 1;
+							}
+						}
+					}
+				}
+			}
+			else if (oElement instanceof ApiParagraph)
+			{
+				var Api = editor;
+				var oDocument = Api.GetDocument().Document;
+
+				var AllViewedChars = 0;
+				var ViewedParaChars = 0;
+				var AllParagraphsList = oDocument.GetAllParagraphs({All : true});
+				point : for (var Index1 = 0; Index1 < AllParagraphsList.length; Index1++)
+				{
+					if (AllParagraphsList[Index1].Id === oElement.Paragraph.Id)
+					{
+						for (var Index2 = 0; Index2 < AllParagraphsList[Index1].Content.length; Index2++)
+						{
+							for (var Index3 = 0; Index3 < AllParagraphsList[Index1].Content[Index2].Content.length; Index3++)
+							{
+								if (AllParagraphsList[Index1].Content[Index2].Content[Index3] instanceof ParaText)
+								{
+									
+									if (this.RelativeStart === ViewedParaChars)
+									{
+										var StartRunPos = 
+										{
+											Class : AllParagraphsList[Index1].Content[Index2],
+											Position : Index3,
+										};
+										this.StartPos = AllParagraphsList[Index1].Content[Index2].GetDocumentPositionFromObject();
+										this.StartPos.push(StartRunPos);
+										this.AbsoluteStart = AllViewedChars;
+										break point;
+									}
+
+									AllViewedChars += 1;
+									ViewedParaChars += 1;
+								}
+							}
+						}
+					}
+					else  
+					{
+						for (var Index2 = 0; Index2 < AllParagraphsList[Index1].Content.length; Index2++)
+						{
+							for (var Index3 = 0; Index3 < AllParagraphsList[Index1].Content[Index2].Content.length; Index3++)
+							{
+								if (AllParagraphsList[Index1].Content[Index2].Content[Index3] instanceof ParaText)
+								{
+									AllViewedChars += 1;
+								}
+							}
+						}
+					}
+					
+				}
+			}
+		}
+		this.SetEnd = function()
+		{
+			if (oElement instanceof ApiDocument)
+			{
+				var AllViewedChars = 0;
+				var AllParagraphsList = oElement.Document.GetAllParagraphs({All : true});
+				point : for (var Index1 = 0; Index1 < AllParagraphsList.length; Index1++)
+				{
+					for (var Index2 = 0; Index2 < AllParagraphsList[Index1].Content.length; Index2++)
+					{
+						for (var Index3 = 0; Index3 < AllParagraphsList[Index1].Content[Index2].Content.length; Index3++)
+						{
+							if (AllParagraphsList[Index1].Content[Index2].Content[Index3] instanceof ParaText)
+							{
+								AllViewedChars += 1;
+
+								if (this.RelativeEnd === AllViewedChars)
+								{
+									var EndRunPos = 
+									{
+										Class : AllParagraphsList[Index1].Content[Index2],
+										Position : Index3 + 2,
+									};
+									this.EndPos = AllParagraphsList[Index1].Content[Index2].GetDocumentPositionFromObject();
+									this.EndPos.push(EndRunPos);
+									break point;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (oElement instanceof ApiParagraph)
+			{
+				var AllViewedChars = 0;
+				var ViewedParaChars = 0;
+
+				var Api = editor;
+				var oDocument = Api.GetDocument().Document;
+
+				var AllParagraphsList = oDocument.GetAllParagraphs({All : true});
+				point : for (var Index1 = 0; Index1 < AllParagraphsList.length; Index1++)
+				{
+					if (AllParagraphsList[Index1].Id === oElement.Paragraph.Id)
+					{
+						for (var Index2 = 0; Index2 < AllParagraphsList[Index1].Content.length; Index2++)
+						{
+							for (var Index3 = 0; Index3 < AllParagraphsList[Index1].Content[Index2].Content.length; Index3++)
+							{
+								if (AllParagraphsList[Index1].Content[Index2].Content[Index3] instanceof ParaText)
+								{
+									AllViewedChars += 1;
+									ViewedParaChars += 1;
+
+									if (this.RelativeEnd === ViewedParaChars)
+									{
+										var EndRunPos = 
+										{
+											Class : AllParagraphsList[Index1].Content[Index2],
+											Position : Index3 + 2,
+										};
+										this.EndPos = AllParagraphsList[Index1].Content[Index2].GetDocumentPositionFromObject();
+										this.EndPos.push(EndRunPos);
+										this.AbsoluteEnd = AllViewedChars;
+										break point;
+									}
+								}
+							}
+						}
+					}
+					else  
+					{
+						for (var Index2 = 0; Index2 < AllParagraphsList[Index1].Content.length; Index2++)
+						{
+							for (var Index3 = 0; Index3 < AllParagraphsList[Index1].Content[Index2].Content.length; Index3++)
+							{
+								if (AllParagraphsList[Index1].Content[Index2].Content[Index3] instanceof ParaText)
+								{
+									AllViewedChars += 1;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	};
+	ApiRange.prototype.constructor = ApiRange;
+	ApiRange.prototype.SetSelection = function()
+	{
+		this.StartPos[0].Class.SetSelectionByContentPositions(this.StartPos, this.EndPos);
+		this.StartPos[0].Class.UpdateSelection();
+	}
+	ApiRange.prototype.SetBold = function(isBold)
+	{
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+		oDocument.Document.StartAction();
+
+		var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+
+		this.SetSelection();
+		oDocument.Document.AddToParagraph(new AscCommonWord.ParaTextPr({Bold : isBold}));
+
+		oStartPos[0].Class.RemoveSelection();
+		oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		oStartPos[0].Class.UpdateSelection();
+
+		oDocument.Document.FinalizeAction();
+	};
 	/**
 	 * Class representing a document.
 	 * @constructor
@@ -1839,6 +2077,16 @@
 	{
 		return this.Document.IsTrackRevisions();
 	};
+	ApiDocument.prototype.GetRange = function(Start, End)
+	{
+		var Range = new ApiRange(this, Start, End);
+
+		// Расчет абсолютных позиий
+		Range.SetStart(); 
+		Range.SetEnd();
+
+		return Range;
+	};
 	//------------------------------------------------------------------------------------------------------------------
 	//
 	// ApiParagraph
@@ -2226,6 +2474,16 @@
 		EndPos.push(EndParaPos, EndRunPos);
 		
 		return EndPos;
+	};
+
+	ApiParagraph.prototype.GetRange = function(Start, End)
+	{
+		var Range = new ApiRange(this, Start, End);
+	
+		// Расчет абсолютных позиий
+		Range.SetStart(); 
+		Range.SetEnd();
+		return Range;
 	};
 	
 	//------------------------------------------------------------------------------------------------------------------
@@ -6272,3 +6530,9 @@
 		return new ApiDocumentContent(oDocContent);
 	};
 }(window, null));
+function Test()
+{
+	var Api = editor; 
+	var oDocument = Api.GetDocument();
+	return oDocument;
+}
