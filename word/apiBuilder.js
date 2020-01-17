@@ -88,7 +88,7 @@
 		this.parentTableCell 	  = null;
 		this.style				  = null;
 		this.tables 			  = null;
-		this.text 				  = null;
+		this.Text 				  = null;
 		this.RelativeStart 		  = Start;
 		this.RelativeEnd 		  = End;
 		this.AbsoluteStart 		  = undefined;
@@ -269,31 +269,151 @@
 				}
 			}
 		}
+		this.GetText = function()
+		{
+			var Api = editor;
+			var oDocument = Api.GetDocument();
+
+			this.SetSelection();
+			this.Text = oDocument.Document.GetSelectedText(false); 
+
+			return this.Text;
+		}
+
+		this.SetStart();
+		this.SetEnd();
+		this.GetText();
 	};
 	ApiRange.prototype.constructor = ApiRange;
+	
 	ApiRange.prototype.SetSelection = function()
 	{
 		this.StartPos[0].Class.SetSelectionByContentPositions(this.StartPos, this.EndPos);
 		this.StartPos[0].Class.UpdateSelection();
-	}
+	};
 	ApiRange.prototype.SetBold = function(isBold)
 	{
 		var Api = editor;
 		var oDocument = Api.GetDocument();
 		oDocument.Document.StartAction();
 
-		var oStartPos = oDocument.Document.GetContentPosition(true, true);
-		var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+		//var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		//var oEndPos   = oDocument.Document.GetContentPosition(true, false);
 
 		this.SetSelection();
 		oDocument.Document.AddToParagraph(new AscCommonWord.ParaTextPr({Bold : isBold}));
 
-		oStartPos[0].Class.RemoveSelection();
-		oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
-		oStartPos[0].Class.UpdateSelection();
+		//oStartPos[0].Class.RemoveSelection();
+		//oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		//oStartPos[0].Class.UpdateSelection();
 
 		oDocument.Document.FinalizeAction();
+		return this;
 	};
+	ApiRange.prototype.SetItalic = function(isItalic)
+	{
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+		oDocument.Document.StartAction();
+
+		//var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		//var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+
+		this.SetSelection();
+		oDocument.Document.AddToParagraph(new AscCommonWord.ParaTextPr({Italic : isItalic}));
+		oDocument.Document.RemoveSelection();
+		//oStartPos[0].Class.RemoveSelection();
+		//oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		//oStartPos[0].Class.UpdateSelection();
+
+		oDocument.Document.FinalizeAction();
+		return this;
+	};
+	ApiRange.prototype.SetUnderline = function(isUnderline)
+	{
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+		oDocument.Document.StartAction();
+
+		//var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		//var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+
+		this.SetSelection();
+		oDocument.Document.AddToParagraph(new AscCommonWord.ParaTextPr({Underline : isUnderline}));
+		oDocument.Document.RemoveSelection();
+		//oStartPos[0].Class.RemoveSelection();
+		//oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		//oStartPos[0].Class.UpdateSelection();
+
+		oDocument.Document.FinalizeAction();
+		return this;
+	};
+	ApiRange.prototype.SetFontSize = function(FontSize)
+	{
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+		oDocument.Document.StartAction();
+
+		//var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		//var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+
+		this.SetSelection();
+		oDocument.Document.AddToParagraph(new AscCommonWord.ParaTextPr({FontSize : FontSize}));
+		oDocument.Document.RemoveSelection();
+		//oStartPos[0].Class.RemoveSelection();
+		//oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		//oStartPos[0].Class.UpdateSelection();
+
+		oDocument.Document.FinalizeAction();
+		return this;
+	};
+	ApiRange.prototype.SetFontFamily = function(FontFamily)
+	{
+		if (typeof FontFamily !== "string" || !(FontFamily instanceof String))
+			return false;
+
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+		oDocument.Document.StartAction();
+
+		//var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		//var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+
+		this.SetSelection();
+		var FontFamily = {
+			Name : FontFamily,
+			Index : -1
+		};
+
+		oDocument.Document.AddToParagraph(new AscCommonWord.ParaTextPr({FontFamily : FontFamily}));
+		oDocument.Document.RemoveSelection();
+		//oStartPos[0].Class.RemoveSelection();
+		//oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		//oStartPos[0].Class.UpdateSelection();
+
+		oDocument.Document.FinalizeAction();
+		return this;
+	};
+	ApiRange.prototype.Delete = function()
+	{
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+		oDocument.Document.StartAction();
+
+		//var oStartPos = oDocument.Document.GetContentPosition(true, true);
+		//var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+
+		this.SetSelection();
+		oDocument.Document.Remove(-1, true, false, false, false);
+		oDocument.Document.RemoveSelection();
+		//oStartPos[0].Class.RemoveSelection();
+		//oStartPos[0].Class.SetSelectionByContentPositions(oStartPos, oEndPos);
+		//oStartPos[0].Class.UpdateSelection();
+
+		oDocument.Document.FinalizeAction();
+		return this;
+	};
+	
 	/**
 	 * Class representing a document.
 	 * @constructor
@@ -2081,10 +2201,6 @@
 	{
 		var Range = new ApiRange(this, Start, End);
 
-		// Расчет абсолютных позиий
-		Range.SetStart(); 
-		Range.SetEnd();
-
 		return Range;
 	};
 	//------------------------------------------------------------------------------------------------------------------
@@ -2480,9 +2596,6 @@
 	{
 		var Range = new ApiRange(this, Start, End);
 	
-		// Расчет абсолютных позиий
-		Range.SetStart(); 
-		Range.SetEnd();
 		return Range;
 	};
 	
