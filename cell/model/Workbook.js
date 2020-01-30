@@ -718,13 +718,25 @@
 		addDefNameOpen: function(name, ref, sheetIndex, hidden, isTable) {
 			var sheetId = this.wb.getSheetIdByIndex(sheetIndex);
 			var isXLNM = null;
-			if(name === "_xlnm.Print_Area") {
-				name = "Print_Area";
+			var XLNMName = this._checkXlnmName(name);
+			if(null !== XLNMName) {
+				name = XLNMName;
 				isXLNM = true;
 			}
 			var defName = new DefName(this.wb, name, ref, sheetId, hidden, isTable, isXLNM);
 			this._addDefName(defName);
 			return defName;
+		},
+		_checkXlnmName: function(name) {
+			var supportName = {"Print_Area": 1, "Print_Titles": 1};
+
+			var prefix = "_xlnm.";
+			var parseName = name.split(prefix)[1];
+			if(supportName[parseName]) {
+				return parseName;
+			}
+
+			return null;
 		},
 		addDefName: function(name, ref, sheetId, hidden, isTable, isXLNM) {
 			var defName = new DefName(this.wb, name, ref, sheetId, hidden, isTable, isXLNM);
@@ -2019,7 +2031,6 @@
 
 		if(!bNoBuildDep){
 			this.dependencyFormulas.initOpen();
-			this.dependencyFormulas.calcTree();
 		}
 		if (bSnapshot) {
 			this.snapshot = this._getSnapshot();
@@ -8458,24 +8469,27 @@
 		this.processFormula(function(parsed) {
 			var valueCalc = parsed.value;
 			if (valueCalc) {
-			if (0 <= valueCalc.numFormat) {
+				if (0 <= valueCalc.numFormat) {
 					if (aStandartNumFormatsId[t.getNumFormatStr()] == 0) {
 						t.setNum(new AscCommonExcel.Num({id: valueCalc.numFormat}));
-				}
-			} else if (AscCommonExcel.cNumFormatFirstCell === valueCalc.numFormat) {
-				// ищет в формуле первый рэндж и устанавливает формат ячейки как формат первой ячейки в рэндже
+					}
+				} else if (AscCommonExcel.cNumFormatFirstCell === valueCalc.numFormat) {
+					//ищет в формуле первый рэндж и устанавливает формат ячейки как формат первой ячейки в рэндже
+					//принимают формат первой ячейки в рейндже только функции с inheritFormat = true
+					//причём это не касается внутренних функий в формуле. если одна из внешних функций принимает формат, тогда выставляем формат у ячейки
+
 					var r = parsed.getFirstRange();
-						if (r && r.getNumFormatStr) {
+					if (r && r.getNumFormatStr) {
 						var sCurFormat = t.getNumFormatStr();
-							if (g_oDefaultFormat.Num.getFormat() == sCurFormat) {
-								var sNewFormat = r.getNumFormatStr();
-								if (sCurFormat != sNewFormat) {
+						if (g_oDefaultFormat.Num.getFormat() == sCurFormat) {
+							var sNewFormat = r.getNumFormatStr();
+							if (sCurFormat != sNewFormat) {
 								t.setNumFormat(sNewFormat);
-								}
 							}
 						}
 					}
 				}
+			}
 		});
 	};
 	Cell.prototype._updateCellValue = function() {

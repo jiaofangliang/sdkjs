@@ -2697,7 +2697,7 @@ parserHelp.setDigitSeparator(AscCommon.g_oDefaultCultureInfo.NumberDecimalSepara
 	//returnValueType - ипользуется константа cReturnFormulaType
 	cBaseFunction.prototype.arrayIndexes = null;
 	cBaseFunction.prototype.returnValueType = null;
-
+	cBaseFunction.prototype.inheritFormat = null;
 	cBaseFunction.prototype.name = null;
 	cBaseFunction.prototype.Calculate = function () {
 		return new cError(cErrorType.wrong_name);
@@ -7269,6 +7269,21 @@ function parserFormula( formula, parent, _ws ) {
 			}
 		}
 		return false;
+	};
+	parserFormula.prototype.getOutsideFunctions = function() {
+		var res;
+		var funcArr = [];
+		var depth = 0;
+		for (var i = 0; i < this.outStack.length; i++) {
+			var elem = this.outStack[i];
+			if (cElementType.func === elem.type) {
+				if(depth === 0) {
+					funcArr.push(elem);
+				}
+				depth++;
+			}
+		}
+		return res;
 	};
 
 	function CalcRecursion() {

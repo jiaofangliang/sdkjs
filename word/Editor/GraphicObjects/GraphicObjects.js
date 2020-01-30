@@ -2127,9 +2127,9 @@ CGraphicObjects.prototype =
     selectNextObject: DrawingObjectsController.prototype.selectNextObject,
 
 
-    getCurrentParagraph: function(bIgnoreSelection, arrSelectedParagraphs)
+    getCurrentParagraph: function(bIgnoreSelection, arrSelectedParagraphs, oPr)
     {
-        var content = this.getTargetDocContent();
+        var content = this.getTargetDocContent(oPr && oPr.CheckDocContent, undefined);
         if(content)
         {
             return content.GetCurrentParagraph(bIgnoreSelection, arrSelectedParagraphs);
@@ -3163,7 +3163,18 @@ CGraphicObjects.prototype =
 
                 if(isRealObject(object) && isRealObject(object.parent))
                 {
-                    return ret.bMarker ?  DRAWING_ARRAY_TYPE_BEFORE : object.parent.getDrawingArrayType();
+                    if(ret.bMarker)
+                    {
+                        return DRAWING_ARRAY_TYPE_BEFORE;
+                    }
+                    else
+                    {
+                        if(object.parent.getDrawingArrayType)
+                        {
+                            return object.parent.getDrawingArrayType();
+                        }
+                        return DRAWING_ARRAY_TYPE_BEFORE;
+                    }
                 }
             }
             else

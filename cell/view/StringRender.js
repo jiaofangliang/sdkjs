@@ -242,7 +242,8 @@
          * @param {Number} maxWidth
          */
         StringRender.prototype.getTransformBound = function(angle, w, h, textW, alignHorizontal, alignVertical, maxWidth) {
-
+			var ctx = this.drawingCtx;
+			
             // TODO: добавить padding по сторонам
 
             this.angle          =   0;  //  angle;
@@ -267,7 +268,9 @@
                 isVertBottom    = (Asc.c_oAscVAlign.Bottom === alignVertical),
                 isVertCenter    = (Asc.c_oAscVAlign.Center === alignVertical || Asc.c_oAscVAlign.Dist === alignVertical || Asc.c_oAscVAlign.Just === alignVertical),
                 isVertTop       = (Asc.c_oAscVAlign.Top    === alignVertical);
-
+			
+				tm.height = tm.height * ctx.getZoom();
+				
             if (isVertBottom) {
                 if (angle < 0) {
                     if (isHorzLeft) {
@@ -280,7 +283,7 @@
                     else if (isHorzRight) {
                         dx = w - posv + 2;
                         offsetX = - (w - posv) - angleSin * tm.height - 2;
-                    }
+					}
                 } else {
                     if (isHorzLeft) {
 
@@ -292,7 +295,7 @@
                     else if (isHorzRight) {
                         dx = w  - posv + 1 + 1 - tm.height * angleSin;
                         offsetX = - w  - posv + 1 + 1 - tm.height * angleSin;
-                    }
+					}
                 }
 
                 if (posh < h) {
@@ -305,7 +308,7 @@
                 } else {
                     if (angle > 0) {
                         dy = h - angleCos * tm.height;
-                    }
+                    } 
                 }
             }
             else if (isVertCenter) {
@@ -364,7 +367,7 @@
                     else if (isHorzRight) {
                         dx = w - posv + 2;
                         offsetX = - (w - posv) - angleSin * tm.height - 2;
-                    }
+					}
                 } else {
                     if (isHorzLeft) {
                     }
@@ -378,7 +381,7 @@
                     }
 
                     dy = Math.min(h + tm.height * angleCos, posh);
-                }
+				}
             }
 
             var bound = { dx: dx, dy: dy, height: 0, width: 0, offsetX: offsetX};
