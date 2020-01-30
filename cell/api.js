@@ -2132,50 +2132,58 @@ var editor;
   };
 
   // Удаление листа
-  spreadsheet_api.prototype.asc_deleteWorksheet = function(deleteIndex) {
+  spreadsheet_api.prototype.asc_deleteWorksheet = function (arrSheets) {
     // Проверка глобального лока
     if (this.collaborativeEditing.getGlobalLock()) {
       return false;
     }
 
-    var i = undefined !== deleteIndex  ? deleteIndex : this.wbModel.getActive();
-    var activeSheet = this.wbModel.getWorksheet(i);
-    var activeName = parserHelp.getEscapeSheetName(activeSheet.sName);
-    var sheetId = activeSheet.getId();
-    var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Sheet, /*subType*/null, sheetId, sheetId);
+    if (!arrSheets) {
+      arrSheets = [this.wbModel.getActive()];
+    }
+
+    // Check delete all
+    if (this.wbModel.getWorksheetCount() === arrSheets.length) {
+      return false;
+    }
+
+    var sheet, arrLocks = [], arrDeleteNames = [];
+    for (var i = 0; i < arrSheets.length; ++i) {
+      sheet = arrSheets[i] = this.wbModel.getWorksheet(arrSheets[i]);
+      arrDeleteNames.push(sheet.sName);
+      arrLocks.push(this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Sheet, /*subType*/null, sheet.getId(), sheet.getId()));
+    }
 
     var t = this;
     var deleteCallback = function(res) {
       if (res) {
-
         History.Create_NewPoint();
         History.StartTransaction();
-        t.wbModel.dependencyFormulas.lockRecal();
         // Нужно проверить все диаграммы, ссылающиеся на удаляемый лист
           t.wbModel.forEach(function (ws) {
 			  History.TurnOff();
 			  var wsView = t.wb.getWorksheet(ws.index, true);
 			  History.TurnOn();
-			  ws.oDrawingOjectsManager.updateChartReferencesWidthHistory(activeName, parserHelp.getEscapeSheetName(ws.sName));
+			  for (var i = 0; i < arrDeleteNames.length; ++i) {
+                ws.oDrawingOjectsManager.updateChartReferencesWidthHistory(arrDeleteNames[i], parserHelp.getEscapeSheetName(ws.sName));
+              }
 			  if (wsView && wsView.objectRender && wsView.objectRender.controller) {
 				  wsView.objectRender.controller.recalculate2(true);
 			  }
           });
 
-        // Удаляем Worksheet и получаем новый активный индекс (-1 означает, что ничего не удалилось)
-        var activeNow = t.wbModel.removeWorksheet(i);
-        if (-1 !== activeNow) {
-          t.wb.removeWorksheet(i);
-          t.asc_showWorksheet(activeNow);
-          // Посылаем callback об изменении списка листов
-          t.sheetsChanged();
+        for (var i = 0; i < arrSheets.length; ++i) {
+          t.wbModel.removeWorksheet(arrSheets[i].getIndex());
         }
-        t.wbModel.dependencyFormulas.unlockRecal();
+        t.wb.updateWorksheetByModel();
+        t.wb.showWorksheet();
         History.EndTransaction();
+        // Посылаем callback об изменении списка листов
+        t.sheetsChanged();
       }
     };
 
-    this.collaborativeEditing.lock([lockInfo], deleteCallback);
+    this.collaborativeEditing.lock(arrLocks, deleteCallback);
     return true;
   };
 
