@@ -1424,6 +1424,14 @@
 		useTextImport: 25
 	};
 
+	var c_oSpecialPasteOperation = {
+		add: 0,
+		subtract: 1,
+		multiply: 2,
+		divide: 3
+	};
+
+
 	/** @enum {number} */
 	var c_oAscNumberingFormat = {
 		None                  : 0x0000,
@@ -2788,6 +2796,13 @@
 	prot['insertAsNestedTable'] = prot.insertAsNestedTable;
 	prot['overwriteCells'] = prot.overwriteCells;
 	prot['useTextImport'] = prot.useTextImport;
+
+	window['Asc']['c_oSpecialPasteOperation'] = window['Asc'].c_oSpecialPasteOperation = c_oSpecialPasteOperation;
+	prot = c_oSpecialPasteOperation;
+	prot['add'] = prot.add;
+	prot['subtract'] = prot.subtract;
+	prot['multiply'] = prot.multiply;
+	prot['divide'] = prot.divide;
 
 	window['Asc']['c_oAscNumberingFormat'] = window['Asc'].c_oAscNumberingFormat = c_oAscNumberingFormat;
 	prot = c_oAscNumberingFormat;

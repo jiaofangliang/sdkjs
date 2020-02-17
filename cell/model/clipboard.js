@@ -87,6 +87,9 @@
 			this.comment = true;
 
 			this.property = null;
+			this.advancedOptions = null;
+
+			this.operation = null;
 		}
 
 		CSpecialPasteProps.prototype = {
@@ -120,6 +123,10 @@
 
 				this.comment = true;
 				this.property = null;
+
+				this.advancedOptions = null;
+
+				this.operation = null;
 			},
 			revert: function () {
 				this.cellStyle = null;
@@ -150,6 +157,8 @@
 
 				//for paste text as csv
 				this.advancedOptions = null;
+
+				this.operation = null;
 			},
 			asc_setProps: function (props) {
 				this.property = props;
@@ -249,6 +258,12 @@
 			},
 			asc_getAdvancedOptions: function () {
 				return this.advancedOptions;
+			},
+			asc_setOperation: function (val) {
+				this.operation = val;
+			},
+			asc_getOperation: function () {
+				return this.operation;
 			}
 		};
 
@@ -4605,6 +4620,8 @@
 		prot									 = CSpecialPasteProps.prototype;
 		prot["asc_setProps"]				     = prot.asc_setProps;
 		prot["asc_setAdvancedOptions"]			 = prot.asc_setAdvancedOptions;
+		prot["asc_setOperation"]		    	 = prot.asc_setOperation;
+		prot["asc_getOperation"]		    	 = prot.asc_getOperation;
 
 	}
 )(jQuery, window);

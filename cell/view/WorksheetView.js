@@ -12124,6 +12124,19 @@
 
 		//set formula - for paste from binary
 		var calculateValueAndBinaryFormula = function (newVal, firstRange, range) {
+
+			//operation special paste
+			var needOperation = specialPasteProps && specialPasteProps.operation;
+			var _toVal, _toFormula;
+			if (null !== needOperation) {
+				_toVal = firstRange ? firstRange.getValueData() : range.getValueData();
+				_toFormula = firstRange ? firstRange.getFormula() : range.getFormula();
+
+				if(!(_toFormula || _toVal.value && null !== _toVal.value.number)) {
+					needOperation = null;
+				}
+			}
+			
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
 			if (cellValueData && cellValueData.value) {
 				if (!specialPasteProps.formula) {
@@ -12237,6 +12250,21 @@
 				}
 			}
 			return res;
+		};
+
+		var applySpecialOperation = function(_val, _range, _formula) {
+			if(_formula) {
+				_range = _formula.range;
+			}
+			var _fromVal = _range.getValueData();
+			//var sFormula = newVal.getFormula();
+			if (_fromVal && _fromVal.value && null !== _fromVal.value.number) {
+				if (_formula) {
+
+				} else {
+
+				}
+			}
 		};
 
 		//column width
