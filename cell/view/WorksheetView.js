@@ -12122,6 +12122,70 @@
 			return res;
 		};*/
 
+		var applySpecialOperation = function(_val1, _val2, _operation, bFormula) {
+			if (_operation === null || null === _val1 || _val2 === null) {
+				return _val1;
+			}
+
+			var part1 = _val1 !== null ? _val1 : null;
+			var part2 = _val2 !== null ? _val2 : null;
+
+			var _formula1 = _val1 && _val1[0] === "=" ? _val1 : null;
+			var _formula2 = _val2 && _val2[0] === "=" ? _val2 : null;
+			var _isFormula;
+			if (_formula1 || _formula2) {
+				_isFormula = true;
+				if (_formula1) {
+					part1 = _formula1.substring(1);
+				} else if(_formula2) {
+					part1 = _formula2.substring(1);
+				}
+			} else if(bFormula) {
+				return null;
+			}
+
+			if (part1 !== null && part2 !== null) {
+				var _res = null;
+				switch (_operation) {
+					case window['Asc'].c_oSpecialPasteOperation.add: {
+						if (_isFormula) {
+							_res = "=" + part1 + "+" + part2;
+						} else {
+							_res = part1 + part2;
+						}
+						break;
+					}
+					case window['Asc'].c_oSpecialPasteOperation.subtract: {
+						if (_isFormula) {
+							_res = "=" + part1 + "-" + part2;
+						} else {
+							_res = part1 - part2;
+						}
+						break;
+					}
+					case window['Asc'].c_oSpecialPasteOperation.multiply: {
+						if (_isFormula) {
+							_res = "=" + part1 + "*" + part2;
+						} else {
+							_res = part1 * part2;
+						}
+						break;
+					}
+					case window['Asc'].c_oSpecialPasteOperation.divide: {
+						if (_isFormula) {
+							_res = "=" + part1 + "/" + part2;
+						} else {
+							_res = part1 / part2;
+						}
+						break;
+					}
+				}
+				return _res !== null ? _res : _val1;
+			}
+
+			return _val1;
+		};
+
 		//set formula - for paste from binary
 		var calculateValueAndBinaryFormula = function (newVal, firstRange, range) {
 
@@ -12135,9 +12199,16 @@
 				if(!(_toFormula || _toVal.value && null !== _toVal.value.number)) {
 					needOperation = null;
 				}
+				if(_toFormula) {
+					specialPasteProps.formula = true;
+				}
 			}
-			
+
+			var _addVal;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
+			if(cellValueData.value && null !== cellValueData.value.number) {
+				cellValueData.value.number = _addVal = applySpecialOperation(cellValueData.value.number, _toVal && _toVal.value ? _toVal.value.number : null, needOperation);
+			}
 			if (cellValueData && cellValueData.value) {
 				if (!specialPasteProps.formula) {
 					cellValueData.formula = null;
@@ -12147,10 +12218,14 @@
 				cellValueData.formula = null;
 				rangeStyle.cellValueData = cellValueData;
 			} else {
-				rangeStyle.val = newVal.getValue();
+				rangeStyle.val = _addVal = applySpecialOperation(newVal.getValue(), _toVal && _toVal.value ? _toVal.value.number : null, needOperation);
 			}
 
+
 			var sFormula = newVal.getFormula();
+			if((sFormula || _toFormula) && needOperation !== null) {
+				sFormula = applySpecialOperation(sFormula ? sFormula : _addVal, _toFormula ? _toFormula : _toVal, needOperation, true);
+			}
 			var sId = newVal.getName();
 
 			if (sFormula) {
@@ -12250,21 +12325,6 @@
 				}
 			}
 			return res;
-		};
-
-		var applySpecialOperation = function(_val, _range, _formula) {
-			if(_formula) {
-				_range = _formula.range;
-			}
-			var _fromVal = _range.getValueData();
-			//var sFormula = newVal.getFormula();
-			if (_fromVal && _fromVal.value && null !== _fromVal.value.number) {
-				if (_formula) {
-
-				} else {
-
-				}
-			}
 		};
 
 		//column width
