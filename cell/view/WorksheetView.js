@@ -11022,7 +11022,11 @@
 			window['AscCommon'].g_specialPasteHelper.Paste_Process_Start();
 			window['AscCommon'].g_specialPasteHelper.Special_Paste_Start();
 
-			api.asc_Undo();
+			props.asc_setOperation(1);
+			var needApplyOperation = props && props.asc_getOperation();
+			if(needApplyOperation === null) {
+				api.asc_Undo();
+			}
 
 			//транзакция закроется в end_paste
 			History.Create_NewPoint();
@@ -12122,7 +12126,7 @@
 			return res;
 		};*/
 
-		var applySpecialOperation = function(_val1, _val2, _operation, bFormula) {
+		var applySpecialOperation = function(_val1, _val2, _formula1, _formula2, _operation, bFormula) {
 			if (_operation === null || null === _val1 || _val2 === null) {
 				return _val1;
 			}
@@ -12130,15 +12134,14 @@
 			var part1 = _val1 !== null ? _val1 : null;
 			var part2 = _val2 !== null ? _val2 : null;
 
-			var _formula1 = _val1 && _val1[0] === "=" ? _val1 : null;
-			var _formula2 = _val2 && _val2[0] === "=" ? _val2 : null;
 			var _isFormula;
 			if (_formula1 || _formula2) {
 				_isFormula = true;
 				if (_formula1) {
-					part1 = _formula1.substring(1);
-				} else if(_formula2) {
-					part1 = _formula2.substring(1);
+					part1 = "(" + _formula1 + ")";
+				}
+				if(_formula2) {
+					part2 = "(" + _formula2 + ")";
 				}
 			} else if(bFormula) {
 				return null;
@@ -12149,7 +12152,7 @@
 				switch (_operation) {
 					case window['Asc'].c_oSpecialPasteOperation.add: {
 						if (_isFormula) {
-							_res = "=" + part1 + "+" + part2;
+							_res = part1 + "+" + part2;
 						} else {
 							_res = part1 + part2;
 						}
@@ -12157,7 +12160,7 @@
 					}
 					case window['Asc'].c_oSpecialPasteOperation.subtract: {
 						if (_isFormula) {
-							_res = "=" + part1 + "-" + part2;
+							_res = part1 + "-" + part2;
 						} else {
 							_res = part1 - part2;
 						}
@@ -12165,7 +12168,7 @@
 					}
 					case window['Asc'].c_oSpecialPasteOperation.multiply: {
 						if (_isFormula) {
-							_res = "=" + part1 + "*" + part2;
+							_res = part1 + "*" + part2;
 						} else {
 							_res = part1 * part2;
 						}
@@ -12173,7 +12176,7 @@
 					}
 					case window['Asc'].c_oSpecialPasteOperation.divide: {
 						if (_isFormula) {
-							_res = "=" + part1 + "/" + part2;
+							_res = part1 + "/" + part2;
 						} else {
 							_res = part1 / part2;
 						}
@@ -12204,10 +12207,10 @@
 				}
 			}
 
-			var _addVal;
+			var _addVal = null;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
-			if(cellValueData.value && null !== cellValueData.value.number) {
-				cellValueData.value.number = _addVal = applySpecialOperation(cellValueData.value.number, _toVal && _toVal.value ? _toVal.value.number : null, needOperation);
+			if (cellValueData && cellValueData.value && null !== cellValueData.value.number) {
+				cellValueData.value.number = _addVal = applySpecialOperation(cellValueData.value.number, _toVal && _toVal.value ? _toVal.value.number : null, null, null,needOperation);
 			}
 			if (cellValueData && cellValueData.value) {
 				if (!specialPasteProps.formula) {
@@ -12218,13 +12221,19 @@
 				cellValueData.formula = null;
 				rangeStyle.cellValueData = cellValueData;
 			} else {
-				rangeStyle.val = _addVal = applySpecialOperation(newVal.getValue(), _toVal && _toVal.value ? _toVal.value.number : null, needOperation);
+				var tempVal = newVal.getValue();
+				if (!isNaN(parseFloat(tempVal))) {
+					_addVal = applySpecialOperation(parseFloat(tempVal), _toVal && _toVal.value ? _toVal.value.number : null, null, null, needOperation);
+					rangeStyle.val = null !== _addVal ? _addVal.toString() : tempVal;
+				} else {
+					rangeStyle.val = tempVal;
+				}
 			}
 
 
 			var sFormula = newVal.getFormula();
 			if((sFormula || _toFormula) && needOperation !== null) {
-				sFormula = applySpecialOperation(sFormula ? sFormula : _addVal, _toFormula ? _toFormula : _toVal, needOperation, true);
+				sFormula = applySpecialOperation(_addVal, _toVal && _toVal.value ? _toVal.value.number : null, sFormula, _toFormula, needOperation, true);
 			}
 			var sId = newVal.getName();
 
