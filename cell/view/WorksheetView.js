@@ -12114,22 +12114,23 @@
 			transposeRange = formulaProps.transposeRange;
 		}
 
-		var applySpecialOperation = function(_val1, _val2, _formula1, _formula2, _operation, bFormula) {
-			if (_operation === null || null === _val1 || _val2 === null) {
-				return bFormula ? _formula1 : _val1;
+		var applySpecialOperation = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, bFormula) {
+			if (_operation === null || null === _pastedVal || _modelVal === null) {
+				return bFormula ? _pastedFormula : _pastedVal;
 			}
 
-			var part2 = _val1 !== null ? _val1 : null;
-			var part1 = _val2 !== null ? _val2 : null;
+			//данные из модель + операция + данные вставки
+			var part2 = _pastedVal !== null ? _pastedVal : null;
+			var part1 = _modelVal !== null ? _modelVal : null;
 
 			var _isFormula;
-			if (_formula1 || _formula2) {
+			if (_pastedFormula || _modelFormula) {
 				_isFormula = true;
-				if (_formula1) {
-					part1 = "(" + _formula1 + ")";
+				if (_pastedFormula) {
+					part2 = "(" + _pastedFormula + ")";
 				}
-				if(_formula2) {
-					part2 = "(" + _formula2 + ")";
+				if(_modelFormula) {
+					part1 = "(" + _modelFormula + ")";
 				}
 			} else if(bFormula) {
 				return null;
@@ -12171,10 +12172,10 @@
 						break;
 					}
 				}
-				return _res !== null ? _res : _val1;
+				return _res !== null ? _res : _pastedVal;
 			}
 
-			return _val1;
+			return _pastedVal;
 		};
 
 		var getModelData = function() {
