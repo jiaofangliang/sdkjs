@@ -11036,7 +11036,7 @@
 			specialPasteHelper.specialPasteProps = props;
 			//TODO пока для закрытия транзации выставляю флаг. пересмотреть!
 			window['AscCommon'].g_specialPasteHelper.bIsEndTransaction = true;
-			AscCommonExcel.g_clipboardExcel.pasteData(t, specialPasteData._format, specialPasteData.data1, specialPasteData.data2, specialPasteData.text_data, true);
+			AscCommonExcel.g_clipboardExcel.pasteData(t, specialPasteData._format, specialPasteData.data1, specialPasteData.data2, specialPasteData.text_data, needApplyOperation === null);
 		};
 
 		if(specialPasteData.activeRange && !isIntoShape)
@@ -12114,25 +12114,13 @@
 			transposeRange = formulaProps.transposeRange;
 		}
 
-		/*var value2ToValue = function (value2) {
-			var res = "";
-
-			if (value2 && value2.length) {
-				for (var i = 0; i < value2.length; i++) {
-					res += value2[i].text;
-				}
-			}
-
-			return res;
-		};*/
-
 		var applySpecialOperation = function(_val1, _val2, _formula1, _formula2, _operation, bFormula) {
 			if (_operation === null || null === _val1 || _val2 === null) {
-				return _val1;
+				return bFormula ? _formula1 : _val1;
 			}
 
-			var part1 = _val1 !== null ? _val1 : null;
-			var part2 = _val2 !== null ? _val2 : null;
+			var part2 = _val1 !== null ? _val1 : null;
+			var part1 = _val2 !== null ? _val2 : null;
 
 			var _isFormula;
 			if (_formula1 || _formula2) {
@@ -12189,28 +12177,34 @@
 			return _val1;
 		};
 
+		var getModelData = function() {
+			var val = firstRange ? firstRange.getValueData() : range.getValueData();
+			if(val === null) {
+				val = new AscCommonExcel.UndoRedoData_CellValueData(null, new AscCommonExcel.CCellValue({number: 0}));
+			}
+			var formula = firstRange ? firstRange.getFormula() : range.getFormula();
+			return {val: val, formula: formula};
+		};
+
 		//set formula - for paste from binary
 		var calculateValueAndBinaryFormula = function (newVal, firstRange, range) {
 
 			//operation special paste
 			var needOperation = specialPasteProps && specialPasteProps.operation;
-			var _toVal, _toFormula;
+			var modelVal, modelFormula;
 			if (null !== needOperation) {
-				_toVal = firstRange ? firstRange.getValueData() : range.getValueData();
-				_toFormula = firstRange ? firstRange.getFormula() : range.getFormula();
-
-				if(!(_toFormula || _toVal.value && null !== _toVal.value.number)) {
+				var _modelData = getModelData();
+				modelVal = _modelData.val;
+				modelFormula = _modelData.formula;
+				if(!(modelFormula || modelVal.value && null !== modelVal.value.number)) {
 					needOperation = null;
-				}
-				if(_toFormula) {
-					specialPasteProps.formula = true;
 				}
 			}
 
 			var _addVal = null;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
 			if (cellValueData && cellValueData.value && null !== cellValueData.value.number) {
-				cellValueData.value.number = _addVal = applySpecialOperation(cellValueData.value.number, _toVal && _toVal.value ? _toVal.value.number : null, null, null,needOperation);
+				cellValueData.value.number = _addVal = applySpecialOperation(cellValueData.value.number, modelVal && modelVal.value ? modelVal.value.number : null, null, null,needOperation);
 			}
 			if (cellValueData && cellValueData.value) {
 				if (!specialPasteProps.formula) {
@@ -12223,7 +12217,7 @@
 			} else {
 				var tempVal = newVal.getValue();
 				if (!isNaN(parseFloat(tempVal))) {
-					_addVal = applySpecialOperation(parseFloat(tempVal), _toVal && _toVal.value ? _toVal.value.number : null, null, null, needOperation);
+					_addVal = applySpecialOperation(parseFloat(tempVal), modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
 					rangeStyle.val = null !== _addVal ? _addVal.toString() : tempVal;
 				} else {
 					rangeStyle.val = tempVal;
@@ -12231,15 +12225,12 @@
 			}
 
 
-			var sFormula = newVal.getFormula();
-			if((sFormula || _toFormula) && needOperation !== null) {
-				sFormula = applySpecialOperation(_addVal, _toVal && _toVal.value ? _toVal.value.number : null, sFormula, _toFormula, needOperation, true);
-			}
+			var pastedFormula = newVal.getFormula();
 			var sId = newVal.getName();
 
-			if (sFormula) {
+			if (pastedFormula) {
 				//formula
-				if (sFormula && !isOneMerge) {
+				if (pastedFormula && !isOneMerge) {
 
 					var offset, arrayOffset;
 					var arrayFormulaRef = formulaProps.cell && formulaProps.cell.formulaParsed ? formulaProps.cell.formulaParsed.getArrayFormulaRef() : null;
@@ -12260,7 +12251,7 @@
 							offset = new AscCommon.CellBase(range.bbox.r1 - cellAddress.row + 1, range.bbox.c1 - cellAddress.col + 1);
 						}
 					}
-					var assemb, _p_ = new AscCommonExcel.parserFormula(sFormula, null, t.model);
+					var assemb, _p_ = new AscCommonExcel.parserFormula(pastedFormula, null, t.model);
 					if (_p_.parse()) {
 
 						//array-formula
@@ -12302,6 +12293,13 @@
 							assemb = _p_.changeOffset(offset, null, true).assemble(true);
 						}
 
+						if(needOperation !== null) {
+							assemb = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, assemb, modelFormula, needOperation, true);
+						}
+
+						rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
+					} else if(modelFormula && needOperation !== null) {
+						assemb = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, modelFormula, needOperation, true);
 						rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
 					}
 				}
