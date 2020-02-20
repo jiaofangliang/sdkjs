@@ -2305,11 +2305,14 @@ var editor;
 	  }
 
 	  var sheet, sBinarySheet, res = [];
+      var activeIndex = this.wbModel.nActive;
 	  for (var i = 0; i < arrSheets.length; ++i) {
-		  sheet = arrSheets[i] = this.wbModel.getWorksheet(arrSheets[i]);
+		  sheet = this.wbModel.getWorksheet(arrSheets[i]);
+		  this.wbModel.nActive = sheet.getIndex();
 		  sBinarySheet = AscCommonExcel.g_clipboardExcel.copyProcessor.getBinaryForCopy(sheet, null, null, true);
           res.push(sBinarySheet);
 	  }
+	  this.wbModel.nActive = activeIndex;
 
       return res;
   };
