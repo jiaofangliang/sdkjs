@@ -2298,10 +2298,10 @@ var editor;
 	  }
 
 	  //если выделены все - берём последний активный, если всего один - не переносим
-	  if (!arrSheets || (this.wbModel.aWorksheets && this.wbModel.aWorksheets.length === arrSheets.length)) {
-		  arrSheets = [this.wbModel.getActive()];
-	  } else if(this.wbModel.aWorksheets.length === 1) {
+	  if(this.wbModel.aWorksheets.length === 1) {
 		  return null;
+	  } else if (!arrSheets || (this.wbModel.aWorksheets && this.wbModel.aWorksheets.length === arrSheets.length)) {
+		  arrSheets = [arrSheets[arrSheets.length - 1]];
 	  }
 
 	  var sheet, sBinarySheet, res = [];
