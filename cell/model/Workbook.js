@@ -2141,6 +2141,7 @@
 	};
 	Workbook.prototype.copyWorksheet=function(index, insertBefore, sName, sId, bFromRedo, tableNames, opt_sheet){
 		//insertBefore - optional
+		var renameParams;
 		if(index >= 0 && index < this.aWorksheets.length){
 			//buildRecalc вызываем чтобы пересчиталося cwf(может быть пустым если сделать сдвиг формул и скопировать лист)
 			this.dependencyFormulas.buildDependency();
@@ -2164,7 +2165,10 @@
 			this.aWorksheetsById[newSheet.getId()] = newSheet;
 			this._updateWorksheetIndexes(wsActive);
 			//copyFrom after sheet add because formula assemble dependce on sheet structure
-			var renameParams = newSheet.copyFrom(wsFrom, sName, tableNames);
+			renameParams = newSheet.copyFrom(wsFrom, sName, tableNames);
+			if(!opt_sheet) {
+				newSheet.copyFromFormulas(renameParams);
+			}
 			newSheet.initPostOpen(this.wsHandlers);
 			History.TurnOn();
 
@@ -2196,6 +2200,7 @@
 				this.addingWorksheet = null;
 			}
 		}
+		return renameParams;
 	};
 	Workbook.prototype.insertWorksheet = function (index, sheet) {
 		var wsActive = this.getActiveWs();
@@ -3554,15 +3559,28 @@
 			this.sheetPr = wsFrom.sheetPr.clone();
 
 		this.selectionRange = wsFrom.selectionRange.clone(this);
+		
+		if(wsFrom.PagePrintOptions) {
+			this.PagePrintOptions = wsFrom.PagePrintOptions.clone(this);
+		}
 
+		//copy headers/footers
+		if(wsFrom.headerFooter) {
+			this.headerFooter = wsFrom.headerFooter.clone(this);
+		}
+
+		return renameParams;
+	};
+
+	Worksheet.prototype.copyFromFormulas=function(renameParams, renameSheetMap) {
 		//change cell formulas
+		var t = this;
 		var oldNewArrayFormulaMap = [];
 		this._forEachCell(function(cell) {
 			if (cell.isFormula()) {
 				var parsed, notMainArrayCell;
-				if (cell.transformSharedFormula()) {
-					parsed = cell.getFormulaParsed();
-				} else {
+				parsed = cell.getFormulaParsed();
+				if (!cell.transformSharedFormula()) {
 					parsed = cell.getFormulaParsed();
 					if(parsed.getArrayFormulaRef()) {//***array-formula***
 						var listenerId = parsed.getListenerId();
@@ -3578,6 +3596,24 @@
 						parsed = parsed.clone(null, new CCellWithFormula(t, cell.nRow, cell.nCol), t);
 					}
 				}
+
+				if(renameSheetMap && History.Is_On()) {
+					//пишем в историю для того, чтобы для случая redo не делать отложенное действия для всех листов
+					var _oldF = parsed.Formula;
+					parsed.parse(null, null, null, null, renameSheetMap);
+					var _newF = parsed.Formula;
+					if(_oldF !== _newF) {
+						var DataOld = cell.getValueData();
+						var DataNew = cell.getValueData();
+						DataNew.formula = _newF;
+						if (false == DataOld.isEqual(DataNew)) {
+							History.Add(AscCommonExcel.g_oUndoRedoCell, AscCH.historyitem_Cell_ChangeValue,
+								cell.ws.getId(), new Asc.Range(cell.nCol, cell.nRow, cell.nCol, cell.nRow),
+								new UndoRedoData_CellSimpleData(cell.nRow, cell.nCol, DataOld, DataNew));
+						}
+					}
+				}
+
 				if(!notMainArrayCell) {
 					parsed.renameSheetCopy(renameParams);
 					parsed.setFormulaString(parsed.assemble(true));
@@ -3586,18 +3622,8 @@
 				t.workbook.dependencyFormulas.addToBuildDependencyCell(cell);
 			}
 		});
-		
-		if(wsFrom.PagePrintOptions) {
-			this.PagePrintOptions = wsFrom.PagePrintOptions.clone(this);
-		}
-
-		//copy headers/footers
-		if(wsFrom.headerFooter) {
-			this.headerFooter = wsFrom.headerFooter.clone(this);
-		}
-
-		return renameParams;
 	};
+
 	Worksheet.prototype.copyObjects = function (oNewWs) {
 		var i;
 		if (null != this.Drawings && this.Drawings.length > 0) {

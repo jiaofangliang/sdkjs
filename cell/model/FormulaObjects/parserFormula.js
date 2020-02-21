@@ -5308,7 +5308,7 @@ function parserFormula( formula, parent, _ws ) {
 		this.isInDependencies = false;
 	};
 
-	parserFormula.prototype.parse = function (local, digitDelim, parseResult, ignoreErrors) {
+	parserFormula.prototype.parse = function (local, digitDelim, parseResult, ignoreErrors, renameSheetMap) {
 		var elemArr = [];
 		var ph = {operand_str: null, pCurrPos: 0};
 		var needAssemble = false;
@@ -6007,6 +6007,19 @@ function parserFormula( formula, parent, _ws ) {
 					parserHelp.is3DRef.call(ph, t.Formula, ph.pCurrPos))[0]) {
 
 				t.is3D = true;
+
+				//renameSheetMap
+				if (renameSheetMap) {
+					if (renameSheetMap[_3DRefTmp[1]]) {
+						_3DRefTmp[1] = renameSheetMap[_3DRefTmp[1]];
+						needAssemble = true;
+					}
+					if (_3DRefTmp[2] && renameSheetMap[_3DRefTmp[2]]) {
+						_3DRefTmp[2] = renameSheetMap[_3DRefTmp[2]];
+						needAssemble = true;
+					}
+				}
+
 				var wsF = t.wb.getWorksheetByName(_3DRefTmp[1]);
 				var wsT = (null !== _3DRefTmp[2]) ? t.wb.getWorksheetByName(_3DRefTmp[2]) : wsF;
 

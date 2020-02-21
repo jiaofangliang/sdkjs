@@ -3261,8 +3261,8 @@
 
 		var doCopy = function() {
 			History.Create_NewPoint();
-			t.model.copyWorksheet(0, insertBefore, name, undefined, undefined, undefined, pastedWs);
-			callback();
+			var renameParams = t.model.copyWorksheet(0, insertBefore, name, undefined, undefined, undefined, pastedWs);
+			callback(renameParams);
 		};
 
 		var api = window["Asc"]["editor"];
