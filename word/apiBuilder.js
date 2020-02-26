@@ -68,7 +68,6 @@
 		this.inlinePictures 	  = undefined;
 		this.isEmpty 			  = true;
 		this.paragraphs 		  = [];
-		this.SelectedContent 	  = undefined;
 		this.Text 				  = undefined;
 
 		this.RangeTextPr = {
@@ -518,7 +517,7 @@
 		{
 			startPara = startPara.Paragraph;
 		}
-		
+
 		if (endPara instanceof ParaHyperlink)
 		{
 			endPara = endPara.Paragraph;
@@ -534,7 +533,7 @@
 		{
 			AllParagraphsListOfElement = this.Element.GetAllParagraphs({All : true});
 
-			for (var Index1 = 0; Index < AllParagraphsListOfElement.length; Index1++)
+			for (var Index1 = 0; Index1 < AllParagraphsListOfElement.length; Index1++)
 			{
 				if (done)
 					break;
@@ -3604,10 +3603,7 @@
 		var done = false;
 
 		var ViewedChars = -1;
-
-		// if (End === 0)
-		// 	ViewedChars++;
-
+		
 		if (oElement instanceof CDocument)
 		{
 			var AllParagraphsList = oElement.GetAllParagraphs({All : true});
@@ -3916,16 +3912,10 @@
 	};
 	ApiDocument.prototype.SaveSelectionInfo = function()
 	{
-		var Api = editor;
-		var oDocument = Api.GetDocument();
-
 		var ParaSelectionsStartAndEnd = [];
 
-		var localStart = 0;
-		var localEnd   = 0;
-
-		var oStartPos = oDocument.Document.GetContentPosition(true, true);
-		var oEndPos   = oDocument.Document.GetContentPosition(true, false);
+		var oStartPos = this.Document.GetContentPosition(true, true);
+		var oEndPos   = this.Document.GetContentPosition(true, false);
 
 		for (var Index = 0; Index < Math.min(oStartPos.length, oEndPos.length); Index++)
 		{
@@ -3939,10 +3929,53 @@
 			}
 		}
 
-		oDocument.Document.SetSelectionByContentPositions(oStartPos, oStartPos);
-		var SaveSelectionState1   = oDocument.Document.GetCurrentParagraph().SaveSelectionState().StartPos;
-		var ParaStart = oDocument.Document.GetCurrentParagraph();
+		var ParaStartInfo = this.GetStartCharAndElementBySelection(oStartPos);
+		var ParaEndInfo   = this.GetEndCharAndElementBySelection(oEndPos);
+
+		ParaSelectionsStartAndEnd.push(ParaStartInfo, ParaEndInfo);
+
+		return ParaSelectionsStartAndEnd;
+	};
+	ApiDocument.prototype.GetRange = function(Start, End)
+	{
+		var Range = new ApiRange(this.Document, Start, End);
+
+		return Range;
+	};
+	ApiDocument.prototype.GetRangeBySelect = function()
+	{
+		var ParaSelectionsStartAndEnd = this.SaveSelectionInfo();
+
+		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
+		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+
+		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		{
+			return new ApiRange(this.Document, 0, 0);
+		}
+		else 
+		{
+			var OldStartSelection = this.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
+			var OldEndSelection   = this.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+
+			this.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
+			this.Document.UpdateSelection();
+
+			return new ApiRange(this.Document, OldStartSelectInfo, OldEndSelectInfo);
+		}
+	};
+	ApiDocument.prototype.GetStartCharAndElementBySelection = function(oStartPos)
+	{
+		var localStart = 0;
+
+		var ParaStart = oStartPos[oStartPos.length - 1].Class.Get_Parent();
 		
+		if (ParaStart instanceof ParaHyperlink)
+		{
+			ParaStart = ParaStart.Paragraph;
+		}
+
+		var SaveSelectionState1   = ParaStart.SaveSelectionState().StartPos;
 
 		for (var curRun = 0; curRun < SaveSelectionState1.Data[0]; curRun++)
 		{
@@ -4009,11 +4042,21 @@
 			Start 	  : localStart
 		};
 
-		oDocument.Document.SetSelectionByContentPositions(oEndPos, oEndPos);
-		var SaveSelectionState2  = oDocument.Document.GetCurrentParagraph().SaveSelectionState().StartPos;
-		var ParaEnd = oDocument.Document.GetCurrentParagraph();
-		
+		return ParaStartInfo;
+	};
+	ApiDocument.prototype.GetEndCharAndElementBySelection = function(oEndPos)
+	{
+		var localEnd   = 0;
 
+		var ParaEnd = oEndPos[oEndPos.length - 1].Class.Get_Parent();
+
+		if (ParaEnd instanceof ParaHyperlink)
+		{
+			ParaEnd = ParaEnd.Paragraph;
+		}
+
+		var SaveSelectionState2  = ParaEnd.SaveSelectionState().EndPos;
+		
 		for (var curRun = 0; curRun < SaveSelectionState2.Data[0]; curRun++)
 		{
 			if (ParaEnd.Content[curRun] instanceof ParaRun)
@@ -4083,37 +4126,7 @@
 			End 	  : localEnd
 		};
 
-		ParaSelectionsStartAndEnd.push(ParaStartInfo, ParaEndInfo);
-
-		return ParaSelectionsStartAndEnd;
-	};
-	ApiDocument.prototype.GetRange = function(Start, End)
-	{
-		var Range = new ApiRange(this.Document, Start, End);
-
-		return Range;
-	};
-	ApiDocument.prototype.GetRangeBySelect = function()
-	{
-		var ParaSelectionsStartAndEnd = this.SaveSelectionInfo();
-
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
-		{
-			return new ApiRange(this.Document, 0, 0);
-		}
-		else 
-		{
-			var OldStartSelection = this.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = this.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-
-			this.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-			this.Document.UpdateSelection();
-
-			return new ApiRange(this.Document, OldStartSelectInfo, OldEndSelectInfo);
-		}
+		return ParaEndInfo;
 	};
 
 	//------------------------------------------------------------------------------------------------------------------
