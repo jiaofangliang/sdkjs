@@ -12111,6 +12111,10 @@
 			transposeRange = formulaProps.transposeRange;
 		}
 
+		if(specialPasteProps && specialPasteProps.skipBlanks && newVal && newVal.isNullText()) {
+			return;
+		}
+
 		var applySpecialOperation = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, bFormula) {
 			if (_operation === null || null === _pastedVal || _modelVal === null) {
 				return bFormula ? _pastedFormula : _pastedVal;
