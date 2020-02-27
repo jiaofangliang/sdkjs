@@ -11022,11 +11022,8 @@
 			window['AscCommon'].g_specialPasteHelper.Paste_Process_Start();
 			window['AscCommon'].g_specialPasteHelper.Special_Paste_Start();
 
-			props.asc_setOperation(1);
-			var needApplyOperation = props && props.asc_getOperation();
-			if(needApplyOperation === null) {
-				api.asc_Undo();
-			}
+
+			api.asc_Undo();
 
 			//транзакция закроется в end_paste
 			History.Create_NewPoint();
@@ -11036,7 +11033,7 @@
 			specialPasteHelper.specialPasteProps = props;
 			//TODO пока для закрытия транзации выставляю флаг. пересмотреть!
 			window['AscCommon'].g_specialPasteHelper.bIsEndTransaction = true;
-			AscCommonExcel.g_clipboardExcel.pasteData(t, specialPasteData._format, specialPasteData.data1, specialPasteData.data2, specialPasteData.text_data, needApplyOperation === null);
+			AscCommonExcel.g_clipboardExcel.pasteData(t, specialPasteData._format, specialPasteData.data1, specialPasteData.data2, specialPasteData.text_data);
 		};
 
 		if(specialPasteData.activeRange && !isIntoShape)
