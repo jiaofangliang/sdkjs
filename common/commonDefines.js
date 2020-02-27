@@ -1421,7 +1421,10 @@
 		keepTextOnly: 23,
 		overwriteCells : 24,
 
-		useTextImport: 25
+		useTextImport: 25,
+
+		comments: 26,
+		columnWidth: 27
 	};
 
 	var c_oSpecialPasteOperation = {
@@ -2797,6 +2800,8 @@
 	prot['insertAsNestedTable'] = prot.insertAsNestedTable;
 	prot['overwriteCells'] = prot.overwriteCells;
 	prot['useTextImport'] = prot.useTextImport;
+	prot['comments'] = prot.comments;
+	prot['columnWidth'] = prot.columnWidth;
 
 	window['Asc']['c_oSpecialPasteOperation'] = window['Asc'].c_oSpecialPasteOperation = c_oSpecialPasteOperation;
 	prot = c_oSpecialPasteOperation;

@@ -258,6 +258,16 @@
 
 						break;
 					}
+					case c_oSpecialPasteProps.comments: {
+						this.revert();
+						this.comment = true;
+						break;
+					}
+					case c_oSpecialPasteProps.columnWidth: {
+						this.revert();
+						this.width = true;
+						break;
+					}
 				}
 			},
 			asc_setAdvancedOptions: function (props) {
