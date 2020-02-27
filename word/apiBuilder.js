@@ -91,12 +91,12 @@
 		this.StartPos = editor.GetDocument().SetStartPos(oElement, this.Start);
 		this.EndPos   = editor.GetDocument().SetEndPos(oElement, this.End);
 
-		if (this.StartPos.length === 0 || this.EndPos.length === 0 || this.Start === this.End)
+		if (this.StartPos.length === 0 || this.EndPos.length === 0)
 			return false;
 		else 
 			this.isEmpty = false;
 
-		this.Text = this.GetText();
+		this.Text 		= this.GetText();
 		this.paragraphs = this.GetAllParagraphs();
 	};
 
@@ -477,29 +477,18 @@
 		var Api = editor;
 		var oDocument = Api.GetDocument();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 
 		this.SetSelection(true);
 
 		var Text = oDocument.Document.GetSelectedText(false); 
-		this.SelectedContent = oDocument.Document.GetSelectedContent();
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
 
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
+		if (oldSelectionInfo.length !== 0)
+		{
+			this.ReturnOldSelection(oldSelectionInfo);
+		}
 
 		return Text;
 	};
@@ -538,9 +527,9 @@
 				if (done)
 					break;
 
-				if (AllParagraphsListOfElement[Index1].Id === startPara)
+				if (AllParagraphsListOfElement[Index1].Id === startPara.Id)
 				{
-					RangeParagraphsList.push(AllParagraphsListOfElement[Index1]);
+					RangeParagraphsList.push(new ApiParagraph(AllParagraphsListOfElement[Index1]));
 
 					for (var Index2 = Index1 + 1; Index2 < AllParagraphsListOfElement.length; Index2++)
 					{
@@ -595,9 +584,9 @@
 	};
 	ApiRange.prototype.SetSelection = function(notUpdate)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
-
+		
 		if (notUpdate === undefined)
 		{
 			notUpdate === false;
@@ -612,7 +601,7 @@
 	};
 	ApiRange.prototype.SetBold = function(isBold)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -620,10 +609,7 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({Bold : isBold}));
@@ -632,19 +618,12 @@
 		
 		this.RangeTextPr.Bold = isBold;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
 
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
+		if (oldSelectionInfo.length !== 0)
+		{
+			this.ReturnOldSelection(oldSelectionInfo);
+		}
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -655,7 +634,7 @@
 	};
 	ApiRange.prototype.SetCaps = function(isCaps)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -663,10 +642,7 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({Caps : isCaps}));
@@ -675,19 +651,12 @@
 		
 		this.RangeTextPr.Caps = isCaps;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -698,7 +667,7 @@
 	};
 	ApiRange.prototype.SetColor = function(r, g, b, isAuto)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var color = new Asc.asc_CColor();
@@ -712,10 +681,7 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
 		this.SetSelection(true);
 
@@ -743,19 +709,12 @@
 		
 		this.RangeTextPr.Color = color;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -766,7 +725,7 @@
 	};
 	ApiRange.prototype.SetDoubleStrikeout = function(isDoubleStrikeout)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -774,11 +733,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+			
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({DStrikeout : isDoubleStrikeout}));
 		editor.WordControl.m_oLogicDocument.Recalculate();
@@ -786,19 +742,12 @@
 		
 		this.RangeTextPr.DStrikeout = isDoubleStrikeout;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -809,7 +758,7 @@
 	};
 	ApiRange.prototype.SetHighlight = function(r, g, b, isNone)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -817,14 +766,9 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+				
 		this.SetSelection(true);
-
-		
 
 		if (true === isNone)
 		{
@@ -842,19 +786,12 @@
 		editor.WordControl.m_oLogicDocument.Recalculate();
 		editor.WordControl.m_oLogicDocument.UpdateInterface();
 		
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -865,7 +802,7 @@
 	};
 	ApiRange.prototype.SetShd = function(sType, r, g, b)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var color = new Asc.asc_CColor();
@@ -879,11 +816,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+			
 		this.SetSelection(true);
 
 		var Shd = new CDocumentShd();
@@ -917,19 +851,12 @@
 		editor.WordControl.m_oLogicDocument.Recalculate();
 		editor.WordControl.m_oLogicDocument.UpdateInterface();
 		
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -940,7 +867,7 @@
 	};
 	ApiRange.prototype.SetItalic = function(isItalic)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -948,10 +875,8 @@
 
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
 		
 		this.SetSelection();
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({Italic : isItalic}));
@@ -960,19 +885,12 @@
 
 		this.Italic = isItalic;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -983,7 +901,7 @@
 	};
 	ApiRange.prototype.SetCaps = function(isCaps)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -991,10 +909,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
 		
 		this.SetSelection(true);
 
@@ -1007,19 +923,12 @@
 		
 		this.RangeTextPr.Caps = isCaps;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1030,7 +939,7 @@
 	};
 	ApiRange.prototype.SetSmallCaps = function(isSmallCaps)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1038,10 +947,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
 		
 		this.SetSelection(true);
 		Api.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({
@@ -1053,19 +960,12 @@
 		
 		this.RangeTextPr.SmallCaps = isSmallCaps;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1076,7 +976,7 @@
 	};
 	ApiRange.prototype.SetSpacing = function(nSpacing)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1084,10 +984,7 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
 		this.SetSelection(true);
 		
@@ -1097,19 +994,12 @@
 		
 		this.RangeTextPr.Spacing = nSpacing;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1120,7 +1010,7 @@
 	};
 	ApiRange.prototype.SetUnderline = function(isUnderline)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1128,10 +1018,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
 		
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({Underline : isUnderline}));
@@ -1140,19 +1028,12 @@
 		
 		this.Underline = isUnderline;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1163,7 +1044,7 @@
 	};
 	ApiRange.prototype.SetVertAlign = function(sType)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1182,10 +1063,7 @@
 
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
 		
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({VertAlign : value}));
@@ -1194,19 +1072,12 @@
 		
 		this.VertAlign = value;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1217,7 +1088,7 @@
 	};
 	ApiRange.prototype.SetPosition = function(nPosition)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		if (typeof nPosition !== "number")
@@ -1228,11 +1099,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+				
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({Position : nPosition}));
 		editor.WordControl.m_oLogicDocument.Recalculate();
@@ -1240,19 +1108,12 @@
 		
 		this.Position = nPosition;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1263,7 +1124,7 @@
 	};
 	ApiRange.prototype.SetLanguage = function(sLangId)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1271,11 +1132,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+				
 		this.SetSelection(true);
 
 		editor.SetLanguage(sLangId);
@@ -1283,19 +1141,12 @@
 		editor.WordControl.m_oLogicDocument.Recalculate();
 		editor.WordControl.m_oLogicDocument.UpdateInterface();
 		
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1306,7 +1157,7 @@
 	};
 	ApiRange.prototype.SetFontSize = function(FontSize)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1314,11 +1165,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction();
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+				
 		this.SetSelection(true);
 		editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({FontSize : FontSize}));
 		editor.WordControl.m_oLogicDocument.Recalculate();
@@ -1326,19 +1174,12 @@
 		
 		this.FontSize = FontSize;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1349,7 +1190,7 @@
 	};
 	ApiRange.prototype.SetFontFamily = function(FontFamily)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		if (typeof FontFamily !== "string")
@@ -1371,10 +1212,7 @@
 				Index : -1
 			};
 
-			var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-			
-			var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-			var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+			var oldSelectionInfo = oDocument.SaveSelectionInfo();
 			
 			this.SetSelection(true);
 			editor.WordControl.m_oLogicDocument.AddToParagraph(new AscCommonWord.ParaTextPr({FontFamily : FontFamily}));
@@ -1383,19 +1221,12 @@
 			
 			this.FontFamily = FontFamily;
 
-			if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+			editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+			if (oldSelectionInfo.length !== 0)
 			{
-				var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-				var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+				this.ReturnOldSelection(oldSelectionInfo);
 			}
-			else 
-			{
-				var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-				var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-			}
-
-			oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-			oDocument.Document.UpdateSelection();
 
 			this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 			this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1408,7 +1239,7 @@
 	};
 	ApiRange.prototype.SetStyle = function(oStyle)
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		if (!(oStyle instanceof ApiStyle))
@@ -1419,11 +1250,8 @@
 		
 		editor.WordControl.m_oLogicDocument.StartAction(AscDFH.historydescription_Document_SetParagraphStyle);
 
-		var ParaSelectionsStartAndEnd = oDocument.SaveSelectionInfo();
-		
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
-		
+		var oldSelectionInfo = oDocument.SaveSelectionInfo();
+				
 		this.SetSelection(true);
 		
 		var styleName = oStyle.GetName();
@@ -1432,19 +1260,12 @@
 		
 		this.Style = oStyle;
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
+		editor.WordControl.m_oLogicDocument.RemoveSelection();
+		
+		if (oldSelectionInfo.length !== 0)
 		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetStartPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+			this.ReturnOldSelection(oldSelectionInfo);
 		}
-		else 
-		{
-			var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
-		}
-
-		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-		oDocument.Document.UpdateSelection();
 
 		this.StartPos = oDocument.SetStartPos(this.Element, this.Start);
 		this.EndPos   = oDocument.SetEndPos(this.Element, this.End);
@@ -1455,7 +1276,7 @@
 	};
 	ApiRange.prototype.Delete = function()
 	{
-		if (this.isEmpty)
+		if (this.isEmpty || this.isEmpty === undefined)
 			return false;
 
 		var Api = editor;
@@ -1468,6 +1289,20 @@
 
 		oDocument.Document.FinalizeAction();
 		return this;
+	};
+	ApiRange.prototype.ReturnOldSelection = function(oldSelectionInfo)
+	{
+		var Api = editor;
+		var oDocument = Api.GetDocument();
+
+		var OldStartSelectInfo  = oldSelectionInfo[0];
+		var OldEndSelectInfo 	= oldSelectionInfo[1];
+
+		var OldStartSelection = oDocument.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
+		var OldEndSelection   = oDocument.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+
+		oDocument.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
+		oDocument.Document.UpdateSelection();
 	};
 	
 	/**
@@ -3912,14 +3747,22 @@
 	};
 	ApiDocument.prototype.SaveSelectionInfo = function()
 	{
-		var ParaSelectionsStartAndEnd = [];
-
+		var oldSelectionInfo = [];
+		
 		var oStartPos = this.Document.GetContentPosition(true, true);
 		var oEndPos   = this.Document.GetContentPosition(true, false);
 
+		var ParaStartInfo = null;
+		var ParaEndInfo	  = null;
+
+		var EmptySelect = true;
+
 		for (var Index = 0; Index < Math.min(oStartPos.length, oEndPos.length); Index++)
 		{
-			if (oStartPos[Index].Position > oEndPos[Index].Position)
+			if (oStartPos[Index].Class.constructor.name  == oEndPos[Index].Class.constructor.name && oStartPos[Index].Position === oEndPos[Index].Position)
+				continue;
+			
+			if (oStartPos[Index].Class.constructor.name  == oEndPos[Index].Class.constructor.name && oStartPos[Index].Position > oEndPos[Index].Position)
 			{
 				var Temp = oStartPos;
 				oStartPos = oEndPos;
@@ -3927,14 +3770,29 @@
 
 				break;
 			}
+			else 
+				break;
 		}
 
-		var ParaStartInfo = this.GetStartCharAndElementBySelection(oStartPos);
-		var ParaEndInfo   = this.GetEndCharAndElementBySelection(oEndPos);
+		for (var Index = 0; Index < oStartPos.length; Index++)
+		{
+			if (oStartPos[Index].Position !== oEndPos[Index].Position)
+			{
+				ParaStartInfo = this.GetStartCharAndElementBySelection(oStartPos);
+				ParaEndInfo   = this.GetEndCharAndElementBySelection(oEndPos);
+				EmptySelect   = false;
+				break;
+			}
+		}
 
-		ParaSelectionsStartAndEnd.push(ParaStartInfo, ParaEndInfo);
+		if (EmptySelect)
+		{
+			return oldSelectionInfo;
+		}
 
-		return ParaSelectionsStartAndEnd;
+		oldSelectionInfo.push(ParaStartInfo, ParaEndInfo);
+
+		return oldSelectionInfo;
 	};
 	ApiDocument.prototype.GetRange = function(Start, End)
 	{
@@ -3944,25 +3802,15 @@
 	};
 	ApiDocument.prototype.GetRangeBySelect = function()
 	{
-		var ParaSelectionsStartAndEnd = this.SaveSelectionInfo();
+		var oldSelectionInfo = this.SaveSelectionInfo();
 
-		var OldStartSelectInfo  = ParaSelectionsStartAndEnd[0];
-		var OldEndSelectInfo 	= ParaSelectionsStartAndEnd[1];
+		if (oldSelectionInfo.length === 0)
+			return new ApiRange(null, 0, 0);
 
-		if (OldStartSelectInfo.Paragraph.Id === OldEndSelectInfo.Paragraph.Id && OldStartSelectInfo.Start === OldEndSelectInfo.End)
-		{
-			return new ApiRange(this.Document, 0, 0);
-		}
-		else 
-		{
-			var OldStartSelection = this.SetStartPos(OldStartSelectInfo.Paragraph, OldStartSelectInfo.Start);
-			var OldEndSelection   = this.SetEndPos(OldEndSelectInfo.Paragraph, OldEndSelectInfo.End);
+		var OldStartSelectInfo  = oldSelectionInfo[0];
+		var OldEndSelectInfo 	= oldSelectionInfo[1];
 
-			this.Document.SetSelectionByContentPositions(OldStartSelection, OldEndSelection);
-			this.Document.UpdateSelection();
-
-			return new ApiRange(this.Document, OldStartSelectInfo, OldEndSelectInfo);
-		}
+		return new ApiRange(this.Document, OldStartSelectInfo, OldEndSelectInfo);
 	};
 	ApiDocument.prototype.GetStartCharAndElementBySelection = function(oStartPos)
 	{
@@ -4035,7 +3883,6 @@
 				}
 			}
 		}
-
 
 		var ParaStartInfo = {
 			Paragraph : ParaStart,
@@ -8598,6 +8445,6 @@ function Test1()
 	//var Pars = [];
 
 	//var Pars = Test().GetElement(0).Table.GetAllParagraphs({All : true});
-	Test().GetElement(0).GetElement(1).GetRange(2,5).SetBold(true);
+	Test().GetElement(0).GetElement(1).GetRange().SetBold(true);
 	return;
 }
