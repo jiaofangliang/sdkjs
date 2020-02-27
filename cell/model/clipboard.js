@@ -127,6 +127,7 @@
 				this.advancedOptions = null;
 
 				this.operation = null;
+				this.skipBlanks = null;
 			},
 			revert: function () {
 				this.cellStyle = null;
@@ -159,6 +160,7 @@
 				this.advancedOptions = null;
 
 				this.operation = null;
+				this.skipBlanks = null;
 			},
 			asc_setProps: function (props) {
 				this.property = props;
@@ -264,6 +266,12 @@
 			},
 			asc_getOperation: function () {
 				return this.operation;
+			},
+			asc_setTranspose: function (val) {
+				this.transpose = val;
+			},
+			asc_setSkipBlanks: function (val) {
+				this.skipBlanks = val;
 			}
 		};
 
@@ -4622,6 +4630,8 @@
 		prot["asc_setAdvancedOptions"]			 = prot.asc_setAdvancedOptions;
 		prot["asc_setOperation"]		    	 = prot.asc_setOperation;
 		prot["asc_getOperation"]		    	 = prot.asc_getOperation;
+		prot["asc_setTranspose"]		    	 = prot.asc_setTranspose;
+		prot["asc_setSkipBlanks"]		    	 = prot.asc_setSkipBlanks;
 
 	}
 )(jQuery, window);
