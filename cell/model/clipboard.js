@@ -60,46 +60,53 @@
 		}
 
 		function CSpecialPasteProps() {
-			this.cellStyle = true;
-			this.val = true;
-			this.numFormat = true;
-			this.formula = true;
-			this.font = true;
-			this.alignVertical = true;
-			this.alignHorizontal = true;
-			this.fontSize = true;
-			this.fontName = true;
-			this.merge = true;
-			this.borders = true;
-			this.wrap = true;
-			this.fill = true;
-			this.angle = true;
-			this.hyperlink = true;
+			this.cellStyle = null;
+			this.val = null;
+			this.numFormat = null;
+			this.formula = null;
+			this.font = null;
+			this.alignVertical = null;
+			this.alignHorizontal = null;
+			this.fontSize = null;
+			this.fontName = null;
+			this.merge = null;
+			this.borders = null;
+			this.wrap = null;
+			this.fill = null;
+			this.angle = null;
+			this.hyperlink = null;
 
-			this.format = true;
-			this.formatTable = true;
+			this.format = null;
+			this.formatTable = null;
 
-			this.images = true;
+			this.images = null;
 
 			this.width = null;
 			this.transpose = null;
 
-			this.comment = true;
+			this.comment = null;
 
-			this.property = null;
+			//for paste text as csv
 			this.advancedOptions = null;
 
 			this.operation = null;
+			this.skipBlanks = null;
 
 			//показывать или нет дополнительный пункт специальной вставки
 			this.showPasteSpecial = null;
+
+			this.init();
 		}
 
 		CSpecialPasteProps.prototype = {
 
 			constructor: CSpecialPasteProps,
 
-			clean: function () {
+			init: function() {
+				this.setBaseOptions();
+			},
+
+			setBaseOptions: function () {
 				this.cellStyle = true;
 				this.val = true;
 				this.numFormat = true;
@@ -134,7 +141,7 @@
 
 				this.showPasteSpecial = null;
 			},
-			revert: function () {
+			_clean: function () {
 				this.cellStyle = null;
 				this.val = null;
 				this.numFormat = null;
@@ -175,7 +182,7 @@
 					}
 					case c_oSpecialPasteProps.pasteOnlyFormula: {
 						//только формулы(или значения)
-						this.revert();
+						this._clean();
 						this.formula = true;
 						this.val = true;
 
@@ -183,7 +190,7 @@
 					}
 					case c_oSpecialPasteProps.formulaNumberFormat: {
 						//только формулы(или значения) и числовой формат
-						this.revert();
+						this._clean();
 						this.formula = true;
 						this.numFormat = true;
 						this.val = true;
@@ -208,12 +215,12 @@
 					}
 					case c_oSpecialPasteProps.pasteOnlyValues: {
 						//только значения(вместо формул также вставляются значения)
-						this.revert();
+						this._clean();
 						this.val = true;
 						break;
 					}
 					case c_oSpecialPasteProps.valueNumberFormat: {
-						this.revert();
+						this._clean();
 						this.val = true;
 						this.numFormat = true;
 						break;
@@ -235,7 +242,7 @@
 						break;
 					}
 					case c_oSpecialPasteProps.link: {
-						this.revert();
+						this._clean();
 						break;
 					}
 					case c_oSpecialPasteProps.picture: {
@@ -249,7 +256,7 @@
 					}
 					case c_oSpecialPasteProps.destinationFormatting: {
 						//только значения(вместо формул также вставляются значения)
-						this.revert();
+						this._clean();
 						this.val = true;
 						//картинки из word сохраняем в данной ситуации
 						if (window['AscCommon'].g_specialPasteHelper.specialPasteData.pasteFromWord) {
@@ -259,12 +266,12 @@
 						break;
 					}
 					case c_oSpecialPasteProps.comments: {
-						this.revert();
+						this._clean();
 						this.comment = true;
 						break;
 					}
 					case c_oSpecialPasteProps.columnWidth: {
-						this.revert();
+						this._clean();
 						this.width = true;
 						break;
 					}
