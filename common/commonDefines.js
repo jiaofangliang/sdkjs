@@ -1425,10 +1425,11 @@
 	};
 
 	var c_oSpecialPasteOperation = {
-		add: 0,
-		subtract: 1,
-		multiply: 2,
-		divide: 3
+		none: 0,
+		add: 1,
+		subtract: 2,
+		multiply: 3,
+		divide: 4
 	};
 
 
@@ -2799,6 +2800,7 @@
 
 	window['Asc']['c_oSpecialPasteOperation'] = window['Asc'].c_oSpecialPasteOperation = c_oSpecialPasteOperation;
 	prot = c_oSpecialPasteOperation;
+	prot['none'] = prot.none;
 	prot['add'] = prot.add;
 	prot['subtract'] = prot.subtract;
 	prot['multiply'] = prot.multiply;

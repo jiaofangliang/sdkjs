@@ -11287,6 +11287,9 @@
 			}
 			window['AscCommon'].g_specialPasteHelper.CleanButtonInfo();
 			window['AscCommon'].g_specialPasteHelper.buttonInfo.asc_setOptions(allowedSpecialPasteProps);
+			if(fromBinary) {
+				window['AscCommon'].g_specialPasteHelper.buttonInfo.asc_setShowPasteSpecial(true);
+			}
 			window['AscCommon'].g_specialPasteHelper.buttonInfo.setRange(selectData[0]);
 		}
 		else
