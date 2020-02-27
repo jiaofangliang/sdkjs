@@ -9770,8 +9770,7 @@ SpecialPasteShowOptions.prototype = {
   
   window["Asc"]["SpecialPasteShowOptions"] = window["Asc"].SpecialPasteShowOptions = SpecialPasteShowOptions;
   prot									 = SpecialPasteShowOptions.prototype;
-  prot["asc_getCellCoord"]				 	= prot.asc_getCellCoord;
+  prot["asc_getCellCoord"]					= prot.asc_getCellCoord;
   prot["asc_getOptions"]					= prot.asc_getOptions;
-  prot["asc_getShowPasteSpecial"]					= prot.asc_getShowPasteSpecial;
-  prot["asc_setShowPasteSpecial"]					= prot.asc_setShowPasteSpecial;
+  prot["asc_getShowPasteSpecial"]			= prot.asc_getShowPasteSpecial;
 })(window);
