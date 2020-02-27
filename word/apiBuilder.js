@@ -8434,17 +8434,4 @@
 		return new ApiDocumentContent(oDocContent);
 	};
 }(window, null));
-function Test()
-{
-	var Api = editor; 
-	var oDocument = Api.GetDocument();
-	return oDocument;
-}
-function Test1()
-{
-	//var Pars = [];
 
-	//var Pars = Test().GetElement(0).Table.GetAllParagraphs({All : true});
-	Test().GetElement(0).GetElement(1).GetRange().SetBold(true);
-	return;
-}
