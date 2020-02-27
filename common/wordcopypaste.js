@@ -9686,6 +9686,8 @@ function SpecialPasteShowOptions()
 	this.shapeId = null;
 	this.fixPosition = null;
 	this.position = null;
+	//показывать или нет дополнительный пункт специальной вставки
+	this.showPasteSpecial = null;
 }
 
 SpecialPasteShowOptions.prototype = {
@@ -9707,6 +9709,7 @@ SpecialPasteShowOptions.prototype = {
 		this.shapeId = null;
 		this.fixPosition = null;
 		this.position = null;
+		this.showPasteSpecial = null;
 	},
 
 	setRange: function(val) {
@@ -9737,6 +9740,12 @@ SpecialPasteShowOptions.prototype = {
 	},
 	asc_getOptions: function (val) {
 		return this.options;
+	},
+	asc_getShowPasteSpecial: function () {
+		return this.showPasteSpecial;
+	},
+	asc_setShowPasteSpecial: function (val) {
+		this.showPasteSpecial = val;
 	}
 };
 
@@ -9763,4 +9772,6 @@ SpecialPasteShowOptions.prototype = {
   prot									 = SpecialPasteShowOptions.prototype;
   prot["asc_getCellCoord"]				 	= prot.asc_getCellCoord;
   prot["asc_getOptions"]					= prot.asc_getOptions;
+  prot["asc_getShowPasteSpecial"]					= prot.asc_getShowPasteSpecial;
+  prot["asc_setShowPasteSpecial"]					= prot.asc_setShowPasteSpecial;
 })(window);

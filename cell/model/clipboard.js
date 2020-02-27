@@ -92,9 +92,6 @@
 			this.operation = null;
 			this.skipBlanks = null;
 
-			//показывать или нет дополнительный пункт специальной вставки
-			this.showPasteSpecial = null;
-
 			this.init();
 		}
 
@@ -138,8 +135,6 @@
 
 				this.operation = null;
 				this.skipBlanks = null;
-
-				this.showPasteSpecial = null;
 			},
 			_clean: function () {
 				this.cellStyle = null;
@@ -294,12 +289,6 @@
 			},
 			asc_setSkipBlanks: function (val) {
 				this.skipBlanks = val;
-			},
-			asc_getShowPasteSpecial: function () {
-				return this.showPasteSpecial;
-			},
-			asc_setShowPasteSpecial: function (val) {
-				this.showPasteSpecial = val;
 			}
 		};
 
@@ -4656,7 +4645,6 @@
 		prot									 = CSpecialPasteProps.prototype;
 		prot["asc_setProps"]				     = prot.asc_setProps;
 		prot["asc_setAdvancedOptions"]			 = prot.asc_setAdvancedOptions;
-		prot["asc_getShowPasteSpecial"]			 = prot.asc_getShowPasteSpecial;
 		prot["asc_setOperation"]		    	 = prot.asc_setOperation;
 		prot["asc_getOperation"]		    	 = prot.asc_getOperation;
 		prot["asc_setTranspose"]		    	 = prot.asc_setTranspose;
