@@ -11267,19 +11267,19 @@
 			//var specialPasteShowOptions = new Asc.SpecialPasteShowOptions();
 			var allowedSpecialPasteProps;
 			var sProps = Asc.c_oSpecialPasteProps;
-			if(fromBinary)
-			{
-				allowedSpecialPasteProps = [sProps.paste, sProps.pasteOnlyFormula, sProps.formulaNumberFormat, sProps.formulaAllFormatting, sProps.formulaWithoutBorders, sProps.formulaColumnWidth,  sProps.pasteOnlyValues, sProps.valueNumberFormat, sProps.valueAllFormating, sProps.pasteOnlyFormating/*, sProps.link*/];
-				if(!checkTablesPaste())
-				{
+			if (fromBinary) {
+				allowedSpecialPasteProps =
+					[sProps.paste, sProps.pasteOnlyFormula, sProps.formulaNumberFormat, sProps.formulaAllFormatting,
+						sProps.formulaWithoutBorders, sProps.formulaColumnWidth, sProps.pasteOnlyValues,
+						sProps.valueNumberFormat, sProps.valueAllFormating, sProps.pasteOnlyFormating, sProps.comments,
+						sProps.columnWidth/*, sProps.link*/];
+				if (!checkTablesPaste()) {
 					//add transpose property
 					allowedSpecialPasteProps.push(sProps.transpose);
 				}
-			}
-			else
-			{
+			} else {
 				//matchDestinationFormatting - пока не добавляю, так как работает как и values
-				if(bText) {
+				if (bText) {
 					allowedSpecialPasteProps = [sProps.keepTextOnly, sProps.useTextImport];
 				} else {
 					allowedSpecialPasteProps = [sProps.sourceformatting, sProps.destinationFormatting];
