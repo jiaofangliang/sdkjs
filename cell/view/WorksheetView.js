@@ -12519,6 +12519,7 @@
 		var positionShapeContent = options.position;
 		var range = options.range;
 		var props = options.options;
+		var showPasteSpecial = options.showPasteSpecial;
 		var cellCoord;
 		if(!positionShapeContent)
 		{
@@ -12537,6 +12538,7 @@
 
 		specialPasteShowOptions.asc_setOptions(props);
 		specialPasteShowOptions.asc_setCellCoord(cellCoord);
+		specialPasteShowOptions.asc_setShowPasteSpecial(showPasteSpecial);
 		this.handlers.trigger("showSpecialPasteOptions", specialPasteShowOptions);
 	};
 
