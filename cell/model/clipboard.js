@@ -272,6 +272,9 @@
 					}
 				}
 			},
+			asc_getProps: function () {
+				return this.property;
+			},
 			asc_setAdvancedOptions: function (props) {
 				this.advancedOptions = props;
 			},
@@ -4644,6 +4647,7 @@
 		window["Asc"]["SpecialPasteProps"]       = window["Asc"].SpecialPasteProps = CSpecialPasteProps;
 		prot									 = CSpecialPasteProps.prototype;
 		prot["asc_setProps"]				     = prot.asc_setProps;
+		prot["asc_getProps"]		         	 = prot.asc_getProps;
 		prot["asc_setAdvancedOptions"]			 = prot.asc_setAdvancedOptions;
 		prot["asc_setOperation"]		    	 = prot.asc_setOperation;
 		prot["asc_getOperation"]		    	 = prot.asc_getOperation;
