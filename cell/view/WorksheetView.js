@@ -12118,74 +12118,6 @@
 			return;
 		}
 
-		var applySpecialOperation2 = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, bFormula) {
-			if (_operation === null || (null === _pastedVal && !_pastedFormula) || (_modelVal === null) && !_modelFormula) {
-				if(_operation !== null && (null === _pastedVal || _modelVal === null)) {
-
-				}
-				return bFormula ? _pastedFormula : _pastedVal;
-			}
-
-			//данные из модель + операция + данные вставки
-			var part2 = _pastedVal !== null ? _pastedVal : null;
-			var part1 = _modelVal !== null ? _modelVal : null;
-
-			var _isFormula;
-			if (_pastedFormula || _modelFormula) {
-				_isFormula = true;
-				if (_pastedFormula) {
-					part2 = "(" + _pastedFormula + ")";
-				}
-				if(_modelFormula) {
-					part1 = "(" + _modelFormula + ")";
-				}
-			} else if(bFormula) {
-				return null;
-			}
-
-			if (part1 !== null && part2 !== null) {
-				var _res = null;
-				switch (_operation) {
-					case window['Asc'].c_oSpecialPasteOperation.add: {
-						if (_isFormula) {
-							_res = part1 + "+" + part2;
-						} else {
-							_res = part1 + part2;
-						}
-						break;
-					}
-					case window['Asc'].c_oSpecialPasteOperation.subtract: {
-						if (_isFormula) {
-							_res = part1 + "-" + part2;
-						} else {
-							_res = part1 - part2;
-						}
-						break;
-					}
-					case window['Asc'].c_oSpecialPasteOperation.multiply: {
-						if (_isFormula) {
-							_res = part1 + "*" + part2;
-						} else {
-							_res = part1 * part2;
-						}
-						break;
-					}
-					case window['Asc'].c_oSpecialPasteOperation.divide: {
-						if (_isFormula) {
-							_res = part1 + "/" + part2;
-						} else {
-							_res = part1 / part2;
-						}
-						break;
-					}
-				}
-				return _res !== null ? _res : _pastedVal;
-			}
-
-			return _pastedVal;
-		};
-
-
 		var _calculateSpecialOperation = function(part1, part2, _operation, _isFormula) {
 			if (part1 !== null && part2 !== null) {
 				var _res = null;
@@ -12227,7 +12159,6 @@
 			return _res;
 		};
 
-
 		var applySpecialOperation = function(_pastedVal, _modelVal, _operation, isEmptyPasted, isEmptyModel) {
 			if (_operation === null) {
 				return _pastedVal;
@@ -12240,51 +12171,14 @@
 			if (_typePasted === CellValueType.Number && _typeModel === CellValueType.Number) {
 				_pastedVal.value.number = _calculateSpecialOperation(_pastedVal.value.number, _modelVal.value.number, _operation);
 				res = _pastedVal;
-			} /*else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.String) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.Number && _modelVal.value.type === CellValueType.String) {
-				res = _modelVal;
-			}  else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Number) {
-				res = _modelVal;
-			}*/  else if (_typePasted === CellValueType.Number && isEmptyModel) {
+			} else if (_typePasted === CellValueType.Number && isEmptyModel) {
 				res = _pastedVal;
-			} /*else if (isEmptyPasted && _modelVal.value.type === CellValueType.Number) {
+			} else {
 				res = _modelVal;
-			} else if (isEmptyPasted && _modelVal.value.type === CellValueType.String) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.String && isEmptyModel) {
-				res = _modelVal;
-			} else if (isEmptyPasted && _modelVal.value.type === CellValueType.Bool) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.Bool && isEmptyModel) {
-				res = _modelVal;
-			} else if (isEmptyPasted && _modelVal.value.type === CellValueType.Error) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.Error && isEmptyModel) {
-				res = _modelVal;
-			}*/ else {
-				res = _modelVal;
-			}/*else if (_pastedVal.value.type === CellValueType.Error && _modelVal.value.type === CellValueType.Number) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Error) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.Error && _modelVal.value.type === CellValueType.Number) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Error) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.Bool && _modelVal.value.type === CellValueType.Number) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Bool) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.Bool && _modelVal.value.type === CellValueType.Number) {
-				res = _modelVal;
-			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Bool) {
-				res = _modelVal;
-			}*/
+			}
 
 			return res;
 		};
-
 
 		var applySpecialOperationFormula = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, isEmptyPasted, isEmptyModel) {
 			var res, part1, part2;
@@ -12311,16 +12205,8 @@
 			return res;
 		};
 
-
-
-
-
 		var getModelData = function() {
 			var val = firstRange ? firstRange.getValueData() : range.getValueData();
-			/*if(val === null || isEmptyRange) {
-				val = new AscCommonExcel.UndoRedoData_CellValueData(null, new AscCommonExcel.CCellValue({number: 0}));
-			}*/
-
 			var formula = firstRange ? firstRange.getFormula() : range.getFormula();
 			return {val: val, formula: formula};
 		};
@@ -12335,9 +12221,6 @@
 				var _modelData = getModelData();
 				modelVal = _modelData.val;
 				modelFormula = _modelData.formula;
-				/*if(!(modelFormula || modelVal.value && null !== modelVal.value.number)) {
-					needOperation = null;
-				}*/
 			}
 
 			var isEmptyModel = firstRange ? firstRange.isNullText() : range.isNullText();
@@ -12359,6 +12242,7 @@
 			} else {
 				//TODO opertation
 
+				
 				var tempVal = newVal.getValue();
 				if (!isNaN(parseFloat(tempVal))) {
 					_addVal = parseFloat(tempVal);
@@ -12371,7 +12255,6 @@
 
 
 			}
-
 
 			var pastedFormula = newVal.getFormula();
 			var sId = newVal.getName();
