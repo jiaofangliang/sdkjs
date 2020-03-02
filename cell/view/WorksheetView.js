@@ -12184,9 +12184,11 @@
 
 		var getModelData = function() {
 			var val = firstRange ? firstRange.getValueData() : range.getValueData();
-			if(val === null) {
+			var isEmptyRange = firstRange ? firstRange.isNullText() : range.isNullText();
+			if(val === null || isEmptyRange) {
 				val = new AscCommonExcel.UndoRedoData_CellValueData(null, new AscCommonExcel.CCellValue({number: 0}));
 			}
+
 			var formula = firstRange ? firstRange.getFormula() : range.getFormula();
 			return {val: val, formula: formula};
 		};
@@ -12209,8 +12211,14 @@
 			var _addVal = null;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
 			if (cellValueData && cellValueData.value && null !== cellValueData.value.number) {
-				cellValueData.value.number = _addVal = applySpecialOperation(cellValueData.value.number, modelVal && modelVal.value ? modelVal.value.number : null, null, null,needOperation);
+				_addVal = cellValueData.value.number;
+				cellValueData.value.number = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
+			} else if (newVal.isNullText() && null !== needOperation) {
+				_addVal = 0;
+				cellValueData.value.number = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
 			}
+
+
 			if (cellValueData && cellValueData.value) {
 				if (!specialPasteProps.formula) {
 					cellValueData.formula = null;
@@ -12222,8 +12230,9 @@
 			} else {
 				var tempVal = newVal.getValue();
 				if (!isNaN(parseFloat(tempVal))) {
-					_addVal = applySpecialOperation(parseFloat(tempVal), modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
-					rangeStyle.val = null !== _addVal ? _addVal.toString() : tempVal;
+					_addVal = parseFloat(tempVal);
+					var _tempValRes = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
+					rangeStyle.val = null !== _tempValRes ? _tempValRes.toString() : tempVal;
 				} else {
 					rangeStyle.val = tempVal;
 				}
