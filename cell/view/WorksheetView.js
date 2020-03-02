@@ -12196,6 +12196,14 @@
 				part2 = _pastedVal.value.number;
 				part1 = "(" + _modelFormula + ")";
 				res = _calculateSpecialOperation(part1, part2, _operation, true);
+			} else if (_pastedFormula && isEmptyModel) {
+				part2 = "(" + _pastedFormula + ")";
+				part1 = 0;
+				res = _calculateSpecialOperation(part1, part2, _operation, true);
+			} else if (_modelFormula && isEmptyPasted) {
+				part2 = 0;
+				part1 = "(" + _modelFormula + ")";
+				res = _calculateSpecialOperation(part1, part2, _operation, true);
 			} else if (_pastedFormula) {
 				res = _pastedFormula;
 			} else {
@@ -12228,8 +12236,7 @@
 			var _addVal = null;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
 			cellValueData = applySpecialOperation(cellValueData, modelVal, needOperation, isEmptyPasted, isEmptyModel);
-			var cellValueDataDup = specialPasteProps.cellStyle ? newVal.getValueData() : null;
-
+			var cellValueDataDup = newVal.getValueData();
 
 			if (cellValueData && cellValueData.value) {
 				if (!specialPasteProps.formula) {
@@ -12240,20 +12247,24 @@
 				cellValueData.formula = null;
 				rangeStyle.cellValueData = cellValueData;
 			} else {
-				//TODO opertation
-
-				
 				var tempVal = newVal.getValue();
-				if (!isNaN(parseFloat(tempVal))) {
-					_addVal = parseFloat(tempVal);
-					var _tempValRes = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
-					rangeStyle.val = null !== _tempValRes ? _tempValRes.toString() : tempVal;
+				if (!isNaN(parseFloat(tempVal)) && needOperation !== null) {
+					var _tempValRes = new AscCommonExcel.UndoRedoData_CellValueData(null, new AscCommonExcel.CCellValue({number: parseFloat(tempVal)}));
+					_tempValRes = applySpecialOperation(_tempValRes, modelVal, needOperation, isEmptyPasted, isEmptyModel);
+
+					if (null === _tempValRes) {
+						rangeStyle.val = "";
+					} else if (null !== _tempValRes.value.number) {
+						rangeStyle.val = _tempValRes.value.number.toString();
+					} else if(null !== _tempValRes.value.multiText) {
+						rangeStyle.val = _tempValRes.value.multiText;
+					} else if (_tempValRes.value.text) {
+						rangeStyle.val = _tempValRes.value.text;
+					}
+
 				} else {
 					rangeStyle.val = tempVal;
 				}
-
-
-
 			}
 
 			var pastedFormula = newVal.getFormula();
