@@ -12233,7 +12233,7 @@
 			var pastedFormula = newVal.getFormula();
 			var sId = newVal.getName();
 
-			if (pastedFormula) {
+			if (pastedFormula || modelFormula) {
 				//formula
 				if (pastedFormula && !isOneMerge) {
 
@@ -12303,10 +12303,10 @@
 						}
 
 						rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
-					} else if(modelFormula && needOperation !== null) {
-						assemb = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, modelFormula, needOperation, true);
-						rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
 					}
+				} else if(modelFormula && needOperation !== null) {
+					assemb = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, modelFormula, needOperation, true);
+					rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
 				}
 			}
 		};
