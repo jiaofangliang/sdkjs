@@ -166,7 +166,7 @@
 				//for paste text as csv
 				this.advancedOptions = null;
 
-				this.operation = null;
+				//this.operation = null;
 				this.skipBlanks = null;
 			},
 			asc_setProps: function (props) {

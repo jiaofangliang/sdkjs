@@ -12233,9 +12233,10 @@
 
 			var isEmptyModel = firstRange ? firstRange.isNullText() : range.isNullText();
 			var isEmptyPasted = newVal.isNullText();
-			var _addVal = null;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
-			cellValueData = applySpecialOperation(cellValueData, modelVal, needOperation, isEmptyPasted, isEmptyModel);
+			if(cellValueData) {
+				cellValueData = applySpecialOperation(cellValueData, modelVal, needOperation, isEmptyPasted, isEmptyModel);
+			}
 			var cellValueDataDup = newVal.getValueData();
 
 			if (cellValueData && cellValueData.value) {
@@ -12247,10 +12248,8 @@
 				cellValueData.formula = null;
 				rangeStyle.cellValueData = cellValueData;
 			} else {
-				var tempVal = newVal.getValue();
-				if (!isNaN(parseFloat(tempVal)) && needOperation !== null) {
-					var _tempValRes = new AscCommonExcel.UndoRedoData_CellValueData(null, new AscCommonExcel.CCellValue({number: parseFloat(tempVal)}));
-					_tempValRes = applySpecialOperation(_tempValRes, modelVal, needOperation, isEmptyPasted, isEmptyModel);
+				if (needOperation !== null) {
+					var _tempValRes = applySpecialOperation(cellValueDataDup, modelVal, needOperation, isEmptyPasted, isEmptyModel);
 
 					if (null === _tempValRes) {
 						rangeStyle.val = "";
@@ -12263,7 +12262,7 @@
 					}
 
 				} else {
-					rangeStyle.val = tempVal;
+					rangeStyle.val = newVal.getValue();
 				}
 			}
 
