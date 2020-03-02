@@ -12118,8 +12118,11 @@
 			return;
 		}
 
-		var applySpecialOperation = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, bFormula) {
-			if (_operation === null || null === _pastedVal || _modelVal === null) {
+		var applySpecialOperation2 = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, bFormula) {
+			if (_operation === null || (null === _pastedVal && !_pastedFormula) || (_modelVal === null) && !_modelFormula) {
+				if(_operation !== null && (null === _pastedVal || _modelVal === null)) {
+
+				}
 				return bFormula ? _pastedFormula : _pastedVal;
 			}
 
@@ -12182,12 +12185,141 @@
 			return _pastedVal;
 		};
 
+
+		var _calculateSpecialOperation = function(part1, part2, _operation, _isFormula) {
+			if (part1 !== null && part2 !== null) {
+				var _res = null;
+				switch (_operation) {
+					case window['Asc'].c_oSpecialPasteOperation.add: {
+						if (_isFormula) {
+							_res = part1 + "+" + part2;
+						} else {
+							_res = part1 + part2;
+						}
+						break;
+					}
+					case window['Asc'].c_oSpecialPasteOperation.subtract: {
+						if (_isFormula) {
+							_res = part1 + "-" + part2;
+						} else {
+							_res = part1 - part2;
+						}
+						break;
+					}
+					case window['Asc'].c_oSpecialPasteOperation.multiply: {
+						if (_isFormula) {
+							_res = part1 + "*" + part2;
+						} else {
+							_res = part1 * part2;
+						}
+						break;
+					}
+					case window['Asc'].c_oSpecialPasteOperation.divide: {
+						if (_isFormula) {
+							_res = part1 + "/" + part2;
+						} else {
+							_res = part1 / part2;
+						}
+						break;
+					}
+				}
+			}
+			return _res;
+		};
+
+
+		var applySpecialOperation = function(_pastedVal, _modelVal, _operation, isEmptyPasted, isEmptyModel) {
+			if (_operation === null) {
+				return _pastedVal;
+			}
+
+			var _typePasted = _pastedVal && _pastedVal.value && !isEmptyPasted ? _pastedVal.value.type : null;
+			var _typeModel = _modelVal && _modelVal.value && !isEmptyModel ? _modelVal.value.type : null;
+
+			var res;
+			if (_typePasted === CellValueType.Number && _typeModel === CellValueType.Number) {
+				_pastedVal.value.number = _calculateSpecialOperation(_pastedVal.value.number, _modelVal.value.number, _operation);
+				res = _pastedVal;
+			} /*else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.String) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.Number && _modelVal.value.type === CellValueType.String) {
+				res = _modelVal;
+			}  else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Number) {
+				res = _modelVal;
+			}*/  else if (_typePasted === CellValueType.Number && isEmptyModel) {
+				res = _pastedVal;
+			} /*else if (isEmptyPasted && _modelVal.value.type === CellValueType.Number) {
+				res = _modelVal;
+			} else if (isEmptyPasted && _modelVal.value.type === CellValueType.String) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.String && isEmptyModel) {
+				res = _modelVal;
+			} else if (isEmptyPasted && _modelVal.value.type === CellValueType.Bool) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.Bool && isEmptyModel) {
+				res = _modelVal;
+			} else if (isEmptyPasted && _modelVal.value.type === CellValueType.Error) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.Error && isEmptyModel) {
+				res = _modelVal;
+			}*/ else {
+				res = _modelVal;
+			}/*else if (_pastedVal.value.type === CellValueType.Error && _modelVal.value.type === CellValueType.Number) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Error) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.Error && _modelVal.value.type === CellValueType.Number) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Error) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.Bool && _modelVal.value.type === CellValueType.Number) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Bool) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.Bool && _modelVal.value.type === CellValueType.Number) {
+				res = _modelVal;
+			} else if (_pastedVal.value.type === CellValueType.String && _modelVal.value.type === CellValueType.Bool) {
+				res = _modelVal;
+			}*/
+
+			return res;
+		};
+
+
+		var applySpecialOperationFormula = function(_pastedVal, _modelVal, _pastedFormula, _modelFormula, _operation, isEmptyPasted, isEmptyModel) {
+			var res, part1, part2;
+			var _typePasted = _pastedVal && _pastedVal.value && !isEmptyPasted ? _pastedVal.value.type : null;
+			var _typeModel = _modelVal && _modelVal.value && !isEmptyModel ? _modelVal.value.type : null;
+			if (_pastedFormula && _modelFormula) {
+				part2 = "(" + _pastedFormula + ")";
+				part1 = "(" + _modelFormula + ")";
+				res = _calculateSpecialOperation(part1, part2, _operation, true);
+			} else if (_pastedFormula && _typeModel === CellValueType.Number) {
+				part2 = "(" + _pastedFormula + ")";
+				part1 = _modelVal.value.number;
+				res = _calculateSpecialOperation(part1, part2, _operation, true);
+			} else if (_modelFormula && _typePasted === CellValueType.Number) {
+				part2 = _pastedVal.value.number;
+				part1 = "(" + _modelFormula + ")";
+				res = _calculateSpecialOperation(part1, part2, _operation, true);
+			} else if (_pastedFormula) {
+				res = _pastedFormula;
+			} else {
+				res = _modelFormula;
+			}
+
+			return res;
+		};
+
+
+
+
+
 		var getModelData = function() {
 			var val = firstRange ? firstRange.getValueData() : range.getValueData();
-			var isEmptyRange = firstRange ? firstRange.isNullText() : range.isNullText();
-			if(val === null || isEmptyRange) {
+			/*if(val === null || isEmptyRange) {
 				val = new AscCommonExcel.UndoRedoData_CellValueData(null, new AscCommonExcel.CCellValue({number: 0}));
-			}
+			}*/
 
 			var formula = firstRange ? firstRange.getFormula() : range.getFormula();
 			return {val: val, formula: formula};
@@ -12203,20 +12335,17 @@
 				var _modelData = getModelData();
 				modelVal = _modelData.val;
 				modelFormula = _modelData.formula;
-				if(!(modelFormula || modelVal.value && null !== modelVal.value.number)) {
+				/*if(!(modelFormula || modelVal.value && null !== modelVal.value.number)) {
 					needOperation = null;
-				}
+				}*/
 			}
 
+			var isEmptyModel = firstRange ? firstRange.isNullText() : range.isNullText();
+			var isEmptyPasted = newVal.isNullText();
 			var _addVal = null;
 			var cellValueData = specialPasteProps.cellStyle ? newVal.getValueData() : null;
-			if (cellValueData && cellValueData.value && null !== cellValueData.value.number) {
-				_addVal = cellValueData.value.number;
-				cellValueData.value.number = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
-			} else if (newVal.isNullText() && null !== needOperation) {
-				_addVal = 0;
-				cellValueData.value.number = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, null, needOperation);
-			}
+			cellValueData = applySpecialOperation(cellValueData, modelVal, needOperation, isEmptyPasted, isEmptyModel);
+			var cellValueDataDup = specialPasteProps.cellStyle ? newVal.getValueData() : null;
 
 
 			if (cellValueData && cellValueData.value) {
@@ -12228,6 +12357,8 @@
 				cellValueData.formula = null;
 				rangeStyle.cellValueData = cellValueData;
 			} else {
+				//TODO opertation
+
 				var tempVal = newVal.getValue();
 				if (!isNaN(parseFloat(tempVal))) {
 					_addVal = parseFloat(tempVal);
@@ -12236,6 +12367,9 @@
 				} else {
 					rangeStyle.val = tempVal;
 				}
+
+
+
 			}
 
 
@@ -12308,13 +12442,13 @@
 						}
 
 						if(needOperation !== null) {
-							assemb = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, assemb, modelFormula, needOperation, true);
+							assemb = applySpecialOperationFormula(cellValueDataDup, modelVal, assemb, modelFormula, needOperation, isEmptyPasted, isEmptyModel);
 						}
 
 						rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
 					}
 				} else if(modelFormula && needOperation !== null) {
-					assemb = applySpecialOperation(_addVal, modelVal && modelVal.value ? modelVal.value.number : null, null, modelFormula, needOperation, true);
+					assemb = applySpecialOperationFormula(cellValueDataDup, modelVal, null, modelFormula, needOperation, isEmptyPasted, isEmptyModel);
 					rangeStyle.formula = {range: range, val: "=" + assemb, arrayRef: arrayFormulaRef};
 				}
 			}
